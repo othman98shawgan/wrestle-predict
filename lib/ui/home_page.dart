@@ -37,8 +37,10 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthRepository>(context);
-    String email = 'oth1998@gmail.com';
+    String email = 'oth1998@gmail1.com';
     String password = '1234567890';
+    String firstName = 'Othman';
+    String lastName = 'Shawgan';
 
     return Scaffold(
       appBar: AppBar(
@@ -58,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(foregroundColor: Colors.black, backgroundColor: Colors.green),
                     onPressed: () {
-                      auth.signUp(email, password);
+                      auth.signUp(email, password, firstName, lastName);
                     },
                     child: const Text('Sign Up'),
                   ),
