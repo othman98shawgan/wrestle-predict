@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "914213678940",
+    "project_id": "wrestle-predict",
+    "storage_bucket": "wrestle-predict.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:914213678940:android:a9d1dc9d2107c2a265db99",
+        "android_client_info": {
+          "package_name": "com.example.wrestle_predict"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBj6LrRBHhs3ahRd6ZvB6C9nWyCSaIk0Q4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
