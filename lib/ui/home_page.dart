@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:wrestle_predict/services/auth.dart';
+import 'package:provider/provider.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -35,6 +36,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = Provider.of<AuthRepository>(context);
+    String email = 'oth1998@gmail.com';
+    String password = '1234567890';
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -46,13 +51,33 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  const Text(
-                    'You have pushed the button this many times:',
+                  auth.user == null ? const Text('You are not logged in') : Text(auth.user!.email.toString()),
+                  SizedBox(height: 20),
+                  Text(auth.status.toString()),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(foregroundColor: Colors.black, backgroundColor: Colors.green),
+                    onPressed: () {
+                      auth.signUp(email, password);
+                    },
+                    child: const Text('Sign Up'),
                   ),
-                  Text(
-                    '$_counter',
-                    style: Theme.of(context).textTheme.headlineMedium,
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(foregroundColor: Colors.black, backgroundColor: Colors.blue),
+                    onPressed: () {
+                      auth.signInWithEmailAndPassword(email, password);
+                    },
+                    child: const Text('Sign In'),
                   ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(foregroundColor: Colors.black, backgroundColor: Colors.red),
+                    onPressed: () {
+                      auth.signOut();
+                    },
+                    child: const Text('Sign Out'),
+                  )
                 ],
               ),
             ),
