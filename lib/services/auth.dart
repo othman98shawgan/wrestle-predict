@@ -1,10 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
+import '../models/user_model.dart';
+import 'firestore_service.dart';
+
 enum Status { unInitialized, authenticated, authenticating, unAuthenticated }
 
 class AuthRepository with ChangeNotifier {
   final FirebaseAuth _auth;
+  final FirestoreService _firestoreService = FirestoreService();
   User? _user;
   Status _status = Status.unInitialized;
 
@@ -16,24 +20,29 @@ class AuthRepository with ChangeNotifier {
   Status get status => _status;
   User? get user => _user;
 
-  Future<UserCredential?> signUp(String email, String password) async {
+  Future<bool> signUp(String email, String password, String firstName, String lastName) async {
     try {
       _status = Status.authenticating;
       notifyListeners();
 
-      UserCredential userCredential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
+      await _auth.createUserWithEmailAndPassword(email: email, password: password);
+
+      _user = _auth.currentUser;
+      if (_user == null) {
+        _status = Status.unAuthenticated;
+        notifyListeners();
+        return false;
+      }
+      _user!.updateDisplayName('$firstName $lastName');
+
+      UserModel user = UserModel(uid: _user!.uid, email: _user!.email!, firstName: firstName, lastName: lastName);
+      await _firestoreService.addUser(user);
 
       _status = Status.authenticated;
       notifyListeners();
-
-      return userCredential;
+      return true;
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        if (kDebugMode) {
-          print('The password provided is too weak.');
-        }
-      } else if (e.code == 'email-already-in-use') {
+      if (e.code == 'email-already-in-use') {
         if (kDebugMode) {
           print('The account already exists for that email.');
         }
@@ -41,7 +50,7 @@ class AuthRepository with ChangeNotifier {
     }
     _status = Status.unAuthenticated;
     notifyListeners();
-    return null;
+    return false;
   }
 
   Future<bool> signInWithEmailAndPassword(String email, String password) async {
@@ -51,6 +60,7 @@ class AuthRepository with ChangeNotifier {
 
       await _auth.signInWithEmailAndPassword(email: email, password: password);
 
+      _user = _auth.currentUser;
       _status = Status.authenticated;
       notifyListeners();
       return true;
