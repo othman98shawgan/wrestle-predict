@@ -4,6 +4,12 @@ class UserModel {
   String lastName;
   String email;
 
+  UserModel.empty()
+      : uid = '',
+        firstName = '',
+        lastName = '',
+        email = '';
+
   UserModel({
     required this.uid,
     required this.firstName,

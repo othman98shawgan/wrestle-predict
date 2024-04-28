@@ -7,50 +7,51 @@ import 'firestore_service.dart';
 enum Status { unInitialized, authenticated, authenticating, unAuthenticated }
 
 class AuthRepository with ChangeNotifier {
-  final FirebaseAuth _auth;
+  final FirebaseAuth auth;
   final FirestoreService _firestoreService = FirestoreService();
   User? _user;
   Status _status = Status.unInitialized;
 
-  AuthRepository.instance() : _auth = FirebaseAuth.instance {
-    _auth.authStateChanges().listen(_onAuthStateChanged);
-    _user = _auth.currentUser;
+  AuthRepository.instance() : auth = FirebaseAuth.instance {
+    auth.authStateChanges().listen(_onAuthStateChanged);
+    _user = auth.currentUser;
   }
 
   Status get status => _status;
   User? get user => _user;
+  String? get displayName => _user?.displayName;
+
+  bool get isAuthenticated => status == Status.authenticated;
 
   Future<bool> signUp(String email, String password, String firstName, String lastName) async {
     try {
       _status = Status.authenticating;
       notifyListeners();
 
-      await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      await auth.createUserWithEmailAndPassword(email: email, password: password).then((value) {
+        auth.currentUser!.updateDisplayName('$firstName $lastName');
+        _user = auth.currentUser;
+        if (_user == null) {
+          _status = Status.unAuthenticated;
+          notifyListeners();
+          return false;
+        }
 
-      _user = _auth.currentUser;
-      if (_user == null) {
-        _status = Status.unAuthenticated;
+        UserModel user = UserModel(uid: _user!.uid, email: _user!.email!, firstName: firstName, lastName: lastName);
+        _firestoreService.addUser(user);
+
+        _status = Status.authenticated;
         notifyListeners();
-        return false;
-      }
-      _user!.updateDisplayName('$firstName $lastName');
-
-      UserModel user = UserModel(uid: _user!.uid, email: _user!.email!, firstName: firstName, lastName: lastName);
-      await _firestoreService.addUser(user);
-
-      _status = Status.authenticated;
-      notifyListeners();
+      });
       return true;
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'email-already-in-use') {
-        if (kDebugMode) {
-          print('The account already exists for that email.');
-        }
+      if (e.message != null) {
+        throw e.message!;
       }
+      _status = Status.unAuthenticated;
+      notifyListeners();
+      rethrow;
     }
-    _status = Status.unAuthenticated;
-    notifyListeners();
-    return false;
   }
 
   Future<bool> signInWithEmailAndPassword(String email, String password) async {
@@ -58,26 +59,27 @@ class AuthRepository with ChangeNotifier {
       _status = Status.authenticating;
       notifyListeners();
 
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
+      await auth.signInWithEmailAndPassword(email: email, password: password);
 
-      _user = _auth.currentUser;
+      _user = auth.currentUser;
       _status = Status.authenticated;
       notifyListeners();
       return true;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'invalid-credential') {
-        if (kDebugMode) {
-          print('Wrong Email/Password combination.');
-        }
+        throw 'Wrong Email/Password combination.';
       }
+      if (e.message != null) {
+        throw e.message!;
+      }
+      _status = Status.unAuthenticated;
+      notifyListeners();
+      rethrow;
     }
-    _status = Status.unAuthenticated;
-    notifyListeners();
-    return false;
   }
 
   Future<void> signOut() async {
-    await _auth.signOut();
+    await auth.signOut();
     _user = null;
     _status = Status.unAuthenticated;
     notifyListeners();

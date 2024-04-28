@@ -12,6 +12,14 @@ class FirestoreService {
     return await usersCollection.doc(user.uid).set(user.toJson());
   }
 
+  Future<UserModel> getUser(String uid) async {
+    UserModel user = UserModel.empty();
+    await usersCollection.doc(uid).get().then((userSnapshot) {
+      user = UserModel.fromJson(userSnapshot.data() as Map<String, dynamic>);
+    });
+    return user;
+  }
+
   Future<void> addData(String collection, Map<String, dynamic> data) async {
     await _db.collection(collection).add(data);
   }
