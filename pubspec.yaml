@@ -18,6 +18,7 @@ dependencies:
   cloud_firestore: ^4.17.0
   firebase_auth: ^4.19.3
   provider: ^6.1.2
+  get: ^4.6.6
 
 dev_dependencies:
   flutter_test:
@@ -26,5 +27,10 @@ dev_dependencies:
   flutter_lints: ^3.0.0
 
 flutter:
+  assets:
+    - images/
+    - images/wrestle_predict_logo.png
+    - images/wrestle_predict_logo_1920_500.png
+    - images/wrestle_predict_logo_1920_300.png
 
   uses-material-design: true

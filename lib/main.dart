@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:wrestle_predict/services/auth.dart';
-import 'firebase_options.dart';
+import 'package:wrestle_predict/ui/auth/sign_up_page.dart';
+import 'package:wrestle_predict/ui/auth/sign_in_page.dart';
+import 'services/firebase_options.dart';
 
 import 'package:wrestle_predict/ui/home_page.dart';
 
@@ -34,7 +36,12 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      initialRoute: AuthRepository.instance().isAuthenticated ? '/home' : '/signIn',
+      routes: {
+        '/signIn': (context) => const SignInPage(),
+        '/signUp': (context) => const SignUpPage(),
+        '/home': (context) => const MyHomePage(title: 'Flutter Demo Home Page'),
+      },
     );
   }
 }
