@@ -3,7 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:wrestle_predict/services/auth.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:wrestle_predict/services/firestore_service.dart';
+
+import '../models/event_model.dart';
+import 'widgets/event_card.dart';
+
+bool isMobile = GetPlatform.isMobile;
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -19,7 +24,7 @@ FirebaseFirestore db = FirebaseFirestore.instance;
 class _MyHomePageState extends State<MyHomePage> {
   final counterDoc = db.collection('counter').doc('counter');
   int _counter = -1;
-  bool isMobile = GetPlatform.isMobile;
+  List<DocumentSnapshot> documents = [];
 
   void _incrementCounter() {
     setState(() {
@@ -34,16 +39,13 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    getCounter();
   }
 
   @override
   Widget build(BuildContext context) {
+    final FirestoreService fs = FirestoreService();
+
     final authRepository = Provider.of<AuthRepository>(context);
-    String email = 'oth1998@gmail1.com';
-    String password = '1234567890';
-    String firstName = 'Othman';
-    String lastName = 'Shawgan';
 
     return Scaffold(
       appBar: AppBar(
@@ -87,61 +89,47 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-      body: Center(
+      body: SingleChildScrollView(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            authRepository.user == null
-                ? const Text('You are not logged in')
-                : Text(authRepository.user!.email.toString()),
-            const SizedBox(height: 20),
-            Text(authRepository.status.toString()),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(foregroundColor: Colors.black, backgroundColor: Colors.green),
-              onPressed: () {
-                authRepository.signUp(email, password, firstName, lastName);
+            const SizedBox(height: 50),
+            StreamBuilder<QuerySnapshot>(
+              stream: fs.getEventsStream(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return LinearProgressIndicator();
+                documents = snapshot.data!.docs;
+                return _buildEventsGridView(context, documents.isNotEmpty ? documents : []);
               },
-              child: const Text('Sign Up'),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(foregroundColor: Colors.black, backgroundColor: Colors.blue),
-              onPressed: () {
-                authRepository.signInWithEmailAndPassword(email, password);
-              },
-              child: const Text('Sign In'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(foregroundColor: Colors.black, backgroundColor: Colors.red),
-              onPressed: () {
-                authRepository.signOut();
-                Navigator.pushNamed(context, "/signIn");
-              },
-              child: const Text('Sign Out'),
-            )
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
     );
   }
+}
 
-  void getCounter() {
-    counterDoc.get().then((DocumentSnapshot documentSnapshot) {
-      if (documentSnapshot.exists) {
-        final data = documentSnapshot.data() as Map<String, dynamic>;
-        setState(() {
-          _counter = data['count'];
-        });
-      }
-    }).onError((e, _) {
-      print("Error reading document: $e");
-    });
-  }
+Widget _buildEventsGridView(BuildContext context, List<DocumentSnapshot>? snapshot) {
+  final snapshotEvents = snapshot!.map((data) => _buildEventCardItem(context, data)).toList();
+  return GridView.count(
+    physics: const ScrollPhysics(),
+    scrollDirection: Axis.vertical,
+    shrinkWrap: true,
+    crossAxisCount: isMobile ? 2 : 6,
+    childAspectRatio: 0.7,
+    padding: const EdgeInsets.all(12.0),
+    mainAxisSpacing: 10.0,
+    crossAxisSpacing: 10.0,
+    children: List<Widget>.generate(snapshotEvents.length, (index) {
+      return GridTile(
+        child: snapshotEvents[index],
+      );
+    }),
+  );
+}
+
+Widget _buildEventCardItem(BuildContext context, DocumentSnapshot snapshot) {
+  final event = Event.fromSnapshot(snapshot);
+  return EventCard(
+    event: event,
+  );
 }

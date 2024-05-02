@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
         useMaterial3: true,
       ),
-      initialRoute: AuthRepository.instance().isAuthenticated ? '/home' : '/signIn',
+      initialRoute: AuthRepository.instance().isConnected ? '/home' : '/signIn',
       routes: {
         '/signIn': (context) => const SignInPage(),
         '/signUp': (context) => const SignUpPage(),
