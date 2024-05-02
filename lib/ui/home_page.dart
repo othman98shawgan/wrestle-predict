@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:wrestle_predict/services/firestore_service.dart';
 
 import '../models/event_model.dart';
+import '../services/admin_service.dart';
 import 'widgets/event_card.dart';
 
 bool isMobile = GetPlatform.isMobile;
@@ -110,6 +111,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             style: buttonStyle,
                             onPressed: () {
                               //Add season method-dialog
+                              showNewSeasonDialog(context);
                             },
                             child: const Text('Create new Season'),
                           ),
@@ -118,6 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             style: buttonStyle,
                             onPressed: () {
                               //Add event method-dialog
+                              showAddEventDialog(context);
                             },
                             child: const Text('Add Event'),
                           ),

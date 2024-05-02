@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:wrestle_predict/services/auth.dart';
 
@@ -17,8 +16,8 @@ class _SignInPageState extends State<SignInPage> {
 
   String email = '${DateTime.now().millisecondsSinceEpoch}@gmail.com';
   String password = '1234567890';
-  String firstName = 'Othman';
-  String lastName = 'Shawgan';
+  String firstName = 'User';
+  String lastName = DateTime.now().millisecondsSinceEpoch.toString().substring(0, 5);
 
   @override
   Widget build(BuildContext context) {
