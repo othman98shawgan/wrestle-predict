@@ -23,18 +23,7 @@ FirebaseFirestore db = FirebaseFirestore.instance;
 
 class _MyHomePageState extends State<MyHomePage> {
   final counterDoc = db.collection('counter').doc('counter');
-  int _counter = -1;
   List<DocumentSnapshot> documents = [];
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-
-    counterDoc.set({'count': _counter}).onError((e, _) {
-      print("Error writing document: $e");
-    });
-  }
 
   @override
   void initState() {
@@ -89,23 +78,82 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            const SizedBox(height: 50),
-            StreamBuilder<QuerySnapshot>(
-              stream: fs.getEventsStream(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return LinearProgressIndicator();
-                documents = snapshot.data!.docs;
-                return _buildEventsGridView(context, documents.isNotEmpty ? documents : []);
-              },
+      body: FutureBuilder(
+        future: fs.getUser(authRepository.user!.uid),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return const LinearProgressIndicator();
+          var currentUser = snapshot.data;
+          return SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                currentUser!.isAdmin
+                    ? Column(
+                        children: [
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                            style: buttonStyle,
+                            onPressed: () {
+                              //Add Update active event method-dialog
+                            },
+                            child: const Text('Update active event'),
+                          ),
+                          const SizedBox(height: 10),
+                          ElevatedButton(
+                            style: buttonStyle,
+                            onPressed: () {
+                              //Add Update non-active event method-dialog
+                            },
+                            child: const Text('Update non-active event'),
+                          ),
+                          const SizedBox(height: 10),
+                          ElevatedButton(
+                            style: buttonStyle,
+                            onPressed: () {
+                              //Add season method-dialog
+                            },
+                            child: const Text('Create new Season'),
+                          ),
+                          const SizedBox(height: 10),
+                          ElevatedButton(
+                            style: buttonStyle,
+                            onPressed: () {
+                              //Add event method-dialog
+                            },
+                            child: const Text('Add Event'),
+                          ),
+                          const SizedBox(height: 10),
+                          ElevatedButton(
+                            style: buttonStyle,
+                            onPressed: () {
+                              //Add match method-dialog
+                            },
+                            child: const Text('Add Match'),
+                          )
+                        ],
+                      )
+                    : const SizedBox(),
+                const SizedBox(height: 50),
+                StreamBuilder<QuerySnapshot>(
+                  stream: fs.getEventsStream(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return const LinearProgressIndicator();
+                    documents = snapshot.data!.docs;
+                    return _buildEventsGridView(context, documents.isNotEmpty ? documents : []);
+                  },
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
+
+  ButtonStyle buttonStyle = ElevatedButton.styleFrom(
+    minimumSize: const Size(250, 0),
+    padding: const EdgeInsets.symmetric(vertical: 16),
+    foregroundColor: Colors.white,
+  );
 }
 
 Widget _buildEventsGridView(BuildContext context, List<DocumentSnapshot>? snapshot) {

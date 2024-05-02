@@ -3,18 +3,21 @@ class UserModel {
   String firstName;
   String lastName;
   String email;
+  bool isAdmin;
 
   UserModel.empty()
       : uid = '',
         firstName = '',
         lastName = '',
-        email = '';
+        email = '',
+        isAdmin = false;
 
   UserModel({
     required this.uid,
     required this.firstName,
     required this.lastName,
     required this.email,
+    this.isAdmin = false,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -23,6 +26,7 @@ class UserModel {
       firstName: json['firstName'],
       lastName: json['lastName'],
       email: json['email'],
+      isAdmin: json['isAdmin'] ?? false,
     );
   }
 
@@ -32,6 +36,7 @@ class UserModel {
       'firstName': firstName,
       'lastName': lastName,
       'email': email,
+      'isAdmin': isAdmin,
     };
   }
 }
