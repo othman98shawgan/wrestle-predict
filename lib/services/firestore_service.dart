@@ -61,6 +61,18 @@ class FirestoreService {
   }
 
   //***** Event Methods *****
+  Future<List<Event>> getAllEvents() async {
+    List<Event> events = [];
+
+    await eventsCollection.get().then((value) {
+      for (var doc in value.docs) {
+        events.add(Event.fromJson(doc.data() as Map<String, dynamic>));
+      }
+    });
+
+    return events;
+  }
+
   Stream<QuerySnapshot> getEventsStream() {
     return eventsCollection.snapshots();
   }
@@ -70,7 +82,8 @@ class FirestoreService {
   }
 
   Future<void> addEvent(Event event) async {
-    return await eventsCollection.doc(event.seasonId).set(event.toJson());
+    addEventToSeason(event.eventId, event.seasonId);
+    return await eventsCollection.doc(event.eventId).set(event.toJson());
   }
 
   //***** Match Methods *****
@@ -83,7 +96,13 @@ class FirestoreService {
   }
 
   Future<void> addMatch(Match match) async {
+    addMatchtoEvent(match.matchId, match.eventId);
     await matchesCollection.doc(match.matchId).set(match.toJson());
+  }
+
+  Future<void> addMatchtoEvent(String matchId, String eventId) {
+    List<String> matchAsList = [matchId];
+    return eventsCollection.doc(eventId).update({"matches": FieldValue.arrayUnion(matchAsList)});
   }
 
   //Generic Methods

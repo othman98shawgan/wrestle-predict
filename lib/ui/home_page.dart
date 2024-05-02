@@ -129,6 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             style: buttonStyle,
                             onPressed: () {
                               //Add match method-dialog
+                              showAddMatchDialog(context);
                             },
                             child: const Text('Add Match'),
                           )

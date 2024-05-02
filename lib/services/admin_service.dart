@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import 'package:wrestle_predict/models/event_model.dart';
 
 import '../models/season.dart';
+import '../models/match.dart';
 import 'firestore_service.dart';
 
 final FirestoreService fs = FirestoreService();
@@ -95,7 +96,6 @@ showAddEventDialog(BuildContext context) async {
       graphicLink: graphicLinkController.text,
     );
     fs.addEvent(newEvent);
-    fs.addEventToSeason(newEvent.eventId, pickedSeason.seasonId);
     Navigator.pop(context);
   });
 
@@ -160,6 +160,122 @@ showAddEventDialog(BuildContext context) async {
                       return DropdownMenuEntry<Season>(
                         value: season,
                         label: season.seasonName,
+                      );
+                    }).toList(),
+                  ),
+                )
+              ],
+            );
+          },
+        );
+      }));
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return alert;
+    },
+  );
+}
+
+showAddMatchDialog(BuildContext context) async {
+  final TextEditingController participantsController = TextEditingController(text: "");
+  final TextEditingController matchTitleController = TextEditingController(text: "");
+  final TextEditingController eventNameController = TextEditingController(text: "");
+  final TextEditingController graphicLinkController = TextEditingController(text: "");
+
+  List<Event> events;
+  late Event pickedEvent;
+
+  var confirmMethod = (() async {
+    var graphic = graphicLinkController.text.isEmpty ? matchImagePlaceHolder : graphicLinkController.text;
+    var match = Match(
+      matchId: const Uuid().v1(),
+      participants: participantsController.text.split(',').map((e) => e.trim()).toList(),
+      winner: "",
+      eventId: pickedEvent.eventId,
+      graphicLink: graphic,
+      matchTitle: matchTitleController.text,
+    );
+
+    fs.addMatch(match);
+
+    Navigator.pop(context);
+  });
+
+  AlertDialog alert = AlertDialog(
+      title: const Text('Add New Event'),
+      contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 16.0),
+      actions: [
+        ElevatedButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+        TextButton(
+          onPressed: confirmMethod,
+          child: const Text('Confirm'),
+        ),
+      ],
+      content: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+        return FutureBuilder(
+          future: fs.getAllEvents(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return const LinearProgressIndicator();
+            events = snapshot.data!;
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  constraints: const BoxConstraints(minWidth: 400, maxWidth: 600, maxHeight: 100, minHeight: 50),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                  child: TextFormField(
+                    controller: matchTitleController,
+                    decoration: const InputDecoration(
+                      labelText: 'Match Title',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  constraints: const BoxConstraints(minWidth: 400, maxWidth: 600, maxHeight: 100, minHeight: 50),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                  child: TextFormField(
+                    controller: participantsController,
+                    decoration: const InputDecoration(
+                      labelText: 'Participants (Comma Separated)',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  constraints: const BoxConstraints(minWidth: 400, maxWidth: 400, maxHeight: 100, minHeight: 50),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                  child: TextFormField(
+                    controller: graphicLinkController,
+                    decoration: const InputDecoration(
+                      labelText: 'Graphic Link',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  constraints: const BoxConstraints(minWidth: 400, maxWidth: 600, maxHeight: 100, minHeight: 50),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                  child: DropdownMenu(
+                    width: 360,
+                    controller: eventNameController,
+                    requestFocusOnTap: true,
+                    label: const Text('Event Name'),
+                    onSelected: (Event? event) {
+                      setState(() {
+                        pickedEvent = event!;
+                      });
+                    },
+                    dropdownMenuEntries: events.map<DropdownMenuEntry<Event>>((Event event) {
+                      return DropdownMenuEntry<Event>(
+                        value: event,
+                        label: event.eventName,
                       );
                     }).toList(),
                   ),
