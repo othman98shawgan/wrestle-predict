@@ -1,9 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Event {
-  final String eventId;
-  final String eventName;
-  final List<String> matches;
-  final String seasonId;
-  final String graphicLink;
+  String eventId;
+  String eventName;
+  List<String> matches;
+  String seasonId;
+  String graphicLink;
 
   Event({
     required this.eventId,
@@ -12,6 +14,12 @@ class Event {
     required this.seasonId,
     required this.graphicLink,
   });
+
+  factory Event.fromSnapshot(DocumentSnapshot snapshot) {
+    final newEvent = Event.fromJson(snapshot.data() as Map<String, dynamic>);
+    newEvent.eventId = snapshot.reference.id;
+    return newEvent;
+  }
 
   factory Event.fromJson(Map<String, dynamic> json) {
     return Event(

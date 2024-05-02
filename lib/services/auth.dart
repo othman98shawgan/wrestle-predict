@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
@@ -22,6 +24,8 @@ class AuthRepository with ChangeNotifier {
   String? get displayName => _user?.displayName;
 
   bool get isAuthenticated => status == Status.authenticated;
+
+  bool get isConnected => auth.currentUser != null;
 
   Future<bool> signUp(String email, String password, String firstName, String lastName) async {
     try {
