@@ -105,6 +105,11 @@ class FirestoreService {
     return eventsCollection.doc(eventId).update({"matches": FieldValue.arrayUnion(matchAsList)});
   }
 
+  //Result Methods
+  Future<void> addResultToMatch(String matchId, String result) {
+    return matchesCollection.doc(matchId).update({"winner": result});
+  }
+
   //Generic Methods
   Future<void> addData(String collection, Map<String, dynamic> data) async {
     await _db.collection(collection).add(data);
