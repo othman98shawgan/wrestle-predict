@@ -94,6 +94,8 @@ showAddEventDialog(BuildContext context) async {
       matches: [],
       seasonId: pickedSeason.seasonId,
       graphicLink: graphicLinkController.text,
+      leaderboard: {for (var user in await fs.getAllUsers()) '${user.firstName} ${user.lastName}': 0},
+      userPicks: {},
     );
     fs.addEvent(newEvent);
     Navigator.pop(context);

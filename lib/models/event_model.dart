@@ -6,6 +6,8 @@ class Event {
   List<String> matches;
   String seasonId;
   String graphicLink;
+  final Map<String, int> leaderboard; //<userId, points>
+  final Map<String, Map<String, String>> userPicks; //<userId, <matchId, winner>>
 
   Event({
     required this.eventId,
@@ -13,6 +15,8 @@ class Event {
     required this.matches,
     required this.seasonId,
     required this.graphicLink,
+    required this.leaderboard,
+    required this.userPicks,
   });
 
   factory Event.fromSnapshot(DocumentSnapshot snapshot) {
@@ -28,6 +32,8 @@ class Event {
       matches: List<String>.from(json['matches']),
       seasonId: json['seasonId'],
       graphicLink: json['graphicLink'],
+      leaderboard: Map<String, int>.from(json['leaderboard']),
+      userPicks: Map<String, Map<String, String>>.from(json['userPicks']),
     );
   }
 
@@ -38,6 +44,8 @@ class Event {
       'matches': matches,
       'seasonId': seasonId,
       'graphicLink': graphicLink,
+      'leaderboard': leaderboard,
+      'userPicks': userPicks,
     };
   }
 }
