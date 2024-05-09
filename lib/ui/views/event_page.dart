@@ -164,6 +164,7 @@ class _EventPageState extends State<EventPage> {
 
   Widget _buildAdminMatchCardItem(BuildContext context, DocumentSnapshot snapshot, int matchIndex) {
     final match = Match.fromSnapshot(snapshot);
+    pickedWinner[matchIndex] = match.winner;
     return Column(mainAxisSize: MainAxisSize.min, children: [
       Expanded(
         flex: 2,
@@ -176,21 +177,18 @@ class _EventPageState extends State<EventPage> {
         child: Center(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(48, 0, 48, 0),
-            child: DropdownButton<String>(
-              isExpanded: true,
-              hint: const Text('Select Winner'),
-              value: pickedWinner[matchIndex] == '-' ? null : pickedWinner[matchIndex],
-              onChanged: (String? newValue) {
+            child: DropdownMenu<String>(
+              enableSearch: false,
+              enableFilter: false,
+              label: const Text('Winner'),
+              initialSelection: pickedWinner[matchIndex],
+              onSelected: (String? value) {
                 setState(() {
-                  pickedWinner[matchIndex] = newValue!;
+                  pickedWinner[matchIndex] = value!;
                 });
-                FocusScope.of(context).requestFocus(FocusNode());
               },
-              items: match.participants.map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
+              dropdownMenuEntries: match.participants.map<DropdownMenuEntry<String>>((String value) {
+                return DropdownMenuEntry<String>(value: value, label: value);
               }).toList(),
             ),
           ),
