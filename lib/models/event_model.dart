@@ -7,7 +7,7 @@ class Event {
   String seasonId;
   String graphicLink;
   final Map<String, int> leaderboard; //<userId, points>
-  final Map<String, Map<String, String>> userPicks; //<userId, <matchId, winner>>
+  final Map<String, Map<String, dynamic>> userPicks; //<userId, <matchId, winner>>
 
   Event({
     required this.eventId,
@@ -33,7 +33,7 @@ class Event {
       seasonId: json['seasonId'],
       graphicLink: json['graphicLink'],
       leaderboard: Map<String, int>.from(json['leaderboard']),
-      userPicks: Map<String, Map<String, String>>.from(json['userPicks']),
+      userPicks: Map<String, Map<String, dynamic>>.from(json['userPicks']),
     );
   }
 
@@ -49,3 +49,6 @@ class Event {
     };
   }
 }
+
+var eventImagePlaceHolder =
+    'https://firebasestorage.googleapis.com/v0/b/wrestle-predict.appspot.com/o/placeholder.png?alt=media&token=7b29bc6c-cc23-492d-b462-61e4ae22e6b8';

@@ -88,14 +88,15 @@ showAddEventDialog(BuildContext context) async {
   late Season pickedSeason;
 
   var confirmMethod = (() async {
+    var graphic = graphicLinkController.text.isEmpty ? matchImagePlaceHolder : graphicLinkController.text;
     Event newEvent = Event(
       eventId: const Uuid().v1(),
       eventName: eventNameController.text,
       matches: [],
       seasonId: pickedSeason.seasonId,
-      graphicLink: graphicLinkController.text,
+      graphicLink: graphic,
       leaderboard: {for (var user in await fs.getAllUsers()) '${user.firstName} ${user.lastName}': 0},
-      userPicks: {},
+      userPicks: {for (var user in await fs.getAllUsers()) '${user.firstName} ${user.lastName}': <String, String>{}},
     );
     fs.addEvent(newEvent);
     Navigator.pop(context);
