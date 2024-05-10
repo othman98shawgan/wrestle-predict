@@ -12,6 +12,7 @@ class FirestoreService {
   final CollectionReference seasonsCollection = FirebaseFirestore.instance.collection('seasons');
   final CollectionReference eventsCollection = FirebaseFirestore.instance.collection('events');
   final CollectionReference matchesCollection = FirebaseFirestore.instance.collection('matches');
+  final CollectionReference globalCollection = FirebaseFirestore.instance.collection('global');
 
   //***** User Methods *****
   Future<void> addUser(UserModel user) async {
@@ -181,6 +182,24 @@ class FirestoreService {
         updateSeasonLeaderboard(seasonId, seasonLeaderboard);
       });
     });
+  }
+
+  Future<Map<String, int>> getCurrentSeasonLeaderboard() async {
+    var currSeasonId = '';
+    Map<String, int> resLeaderboard;
+    late Map<String, int> userNameLeaderboard = {};
+    await globalCollection.doc('currSeason').get().then((data) async {
+      currSeasonId = (data.data() as Map<String, dynamic>)['seasonId'];
+      await getSeasonLeaderboard(currSeasonId).then((leaderboard) async {
+        resLeaderboard = leaderboard;
+        for (var key in resLeaderboard.keys) {
+          await getUser(key).then((value) {
+            userNameLeaderboard['${value.firstName} ${value.lastName}'] = resLeaderboard[key]!;
+          });
+        }
+      });
+    });
+    return userNameLeaderboard;
   }
 
   //Generic Methods
