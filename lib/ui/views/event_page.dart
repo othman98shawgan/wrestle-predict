@@ -26,6 +26,7 @@ class EventPage extends StatefulWidget {
 
 class _EventPageState extends State<EventPage> {
   List<String> pickedWinner = [];
+  Map<String, String> pickedWinnerMap = {};
   List<DocumentSnapshot> documents = [];
 
   @override
@@ -66,13 +67,27 @@ class _EventPageState extends State<EventPage> {
                               foregroundColor: Colors.white,
                             ),
                             onPressed: () {
+                              for (var i = 0; i < documents.length; i++) {
+                                pickedWinnerMap[documents[i].id] = pickedWinner[i];
+                              }
+                              var event = widget.event;
                               if (currentUser.isAdmin) {
                                 for (var i = 0; i < documents.length; i++) {
                                   fs.addResultToMatch(documents[i].id, pickedWinner[i]);
                                 }
-                                //Add method for saving winners.
+                                event.userPicks.forEach((key, userPick) {
+                                  event.leaderboard[key] = 0;
+                                  userPick.forEach((matchId, pick) {
+                                    if (pickedWinnerMap[matchId] == pick) {
+                                      event.leaderboard[key] = event.leaderboard[key]! + 1;
+                                    }
+                                  });
+                                });
+
+                                fs.updateLeaderboard(event.eventId, event.seasonId, event.leaderboard);
+                                //Update event and Season Leaderboard
                               } else {
-                                //Add method for saving prediction.
+                                fs.addUserPicksToEvent(event.eventId, currentUser.uid, pickedWinnerMap);
                               }
                               Navigator.pop(context);
                             },
@@ -183,9 +198,7 @@ class _EventPageState extends State<EventPage> {
               label: const Text('Winner'),
               initialSelection: pickedWinner[matchIndex],
               onSelected: (String? value) {
-                setState(() {
-                  pickedWinner[matchIndex] = value!;
-                });
+                pickedWinner[matchIndex] = value!;
               },
               dropdownMenuEntries: match.participants.map<DropdownMenuEntry<String>>((String value) {
                 return DropdownMenuEntry<String>(value: value, label: value);

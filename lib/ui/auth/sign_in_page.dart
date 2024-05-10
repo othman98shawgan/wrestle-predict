@@ -14,10 +14,10 @@ class _SignInPageState extends State<SignInPage> {
   final TextEditingController passwordController = TextEditingController(text: "");
   bool isPasswordVisible = false;
 
-  String email = '${DateTime.now().millisecondsSinceEpoch}@gmail.com';
+  String email = '${DateTime.now().millisecond}@gmail.com';
   String password = '1234567890';
   String firstName = 'User';
-  String lastName = DateTime.now().millisecondsSinceEpoch.toString().substring(0, 5);
+  String lastName = DateTime.now().millisecond.toString();
 
   @override
   Widget build(BuildContext context) {

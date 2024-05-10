@@ -4,6 +4,7 @@ class Season {
   final List<String> events;
   final Map<String, int> leaderboard;
   final bool isActive;
+  final List<String> users;
 
   Season({
     required this.seasonId,
@@ -11,6 +12,7 @@ class Season {
     required this.events,
     required this.leaderboard,
     required this.isActive,
+    required this.users,
   });
 
   factory Season.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class Season {
       events: List<String>.from(json['events']),
       leaderboard: Map<String, int>.from(json['leaderboard']),
       isActive: json['isActive'],
+      users: List<String>.from(json['users']),
     );
   }
 
@@ -30,6 +33,7 @@ class Season {
       'events': events,
       'leaderboard': leaderboard,
       'isActive': isActive,
+      'users': users,
     };
   }
 }

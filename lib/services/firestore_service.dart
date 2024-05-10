@@ -38,6 +38,21 @@ class FirestoreService {
     return users;
   }
 
+  Future<List<UserModel>> getAllUsersFromSeason(String seasonId) async {
+    List<UserModel> users = [];
+
+    await seasonsCollection.doc(seasonId).get().then((value) async {
+      Season seaosn = Season.fromJson(value.data() as Map<String, dynamic>);
+      var userIdList = seaosn.users;
+      for (var userId in userIdList) {
+        UserModel user = await getUser(userId);
+        users.add(user);
+      }
+    });
+
+    return users;
+  }
+
   //***** Season Methods *****
   Future<void> addSeason(Season season) async {
     return await seasonsCollection.doc(season.seasonId).set(season.toJson());
@@ -58,6 +73,20 @@ class FirestoreService {
   Future<void> addEventToSeason(String eventId, String seasonId) {
     List<String> eventAsList = [eventId];
     return seasonsCollection.doc(seasonId).update({"events": FieldValue.arrayUnion(eventAsList)});
+  }
+
+  Future<void> updateSeasonLeaderboard(String seasonId, Map<String, int> leaderboard) {
+    return seasonsCollection.doc(seasonId).update({"leaderboard": leaderboard});
+  }
+
+  Future<Map<String, int>> getSeasonLeaderboard(String seasonId) async {
+    Map<String, int> leaderboard = {};
+    await seasonsCollection.doc(seasonId).get().then((seasonSnapshot) {
+      Season season = Season.fromJson(seasonSnapshot.data() as Map<String, dynamic>);
+      leaderboard = season.leaderboard;
+    });
+
+    return leaderboard;
   }
 
   //***** Event Methods *****
@@ -86,6 +115,20 @@ class FirestoreService {
     return await eventsCollection.doc(event.eventId).set(event.toJson());
   }
 
+  Future<void> updateEventLeaderboard(String eventId, Map<String, int> leaderboard) {
+    return eventsCollection.doc(eventId).update({"leaderboard": leaderboard});
+  }
+
+  Future<Map<String, int>> getEventLeaderboard(String eventId) async {
+    Map<String, int> leaderboard = {};
+    await eventsCollection.doc(eventId).get().then((eventSnapshot) {
+      Event event = Event.fromJson(eventSnapshot.data() as Map<String, dynamic>);
+      leaderboard = event.leaderboard;
+    });
+
+    return leaderboard;
+  }
+
   //***** Match Methods *****
   Stream<DocumentSnapshot> getMatchFromFirebase(String matchId) {
     return matchesCollection.doc(matchId).snapshots();
@@ -108,6 +151,36 @@ class FirestoreService {
   //Result Methods
   Future<void> addResultToMatch(String matchId, String result) {
     return matchesCollection.doc(matchId).update({"winner": result});
+  }
+
+  Future<void> addUserPicksToEvent(String eventId, String userId, Map<String, String> picks) {
+    return eventsCollection.doc(eventId).update({"userPicks.$userId": picks});
+  }
+
+  Future<String> getMatchWinner(String matchId) async {
+    String winner = '';
+    await matchesCollection.doc(matchId).get().then((matchSnapshot) {
+      Match match = Match.fromJson(matchSnapshot.data() as Map<String, dynamic>);
+      winner = match.winner;
+    });
+
+    return winner;
+  }
+
+  //Leaderboard Methods
+  Future<void> updateLeaderboard(String eventId, String seasonId, Map<String, int> newLeaderboard) async {
+    getSeasonLeaderboard(seasonId).then((seasonLeaderboard) {
+      getEventLeaderboard(eventId).then((eventLeaderboard) {
+        seasonLeaderboard.forEach((key, value) {
+          if (eventLeaderboard.containsKey(key)) {
+            seasonLeaderboard[key] = seasonLeaderboard[key]! - eventLeaderboard[key]!;
+            seasonLeaderboard[key] = seasonLeaderboard[key]! + newLeaderboard[key]!;
+          }
+        });
+        updateEventLeaderboard(eventId, newLeaderboard);
+        updateSeasonLeaderboard(seasonId, seasonLeaderboard);
+      });
+    });
   }
 
   //Generic Methods
