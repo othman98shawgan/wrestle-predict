@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:wrestle_predict/services/auth.dart';
 import 'package:wrestle_predict/ui/auth/sign_up_page.dart';
 import 'package:wrestle_predict/ui/auth/sign_in_page.dart';
+import 'package:wrestle_predict/ui/views/leaderboard_page.dart';
 import 'services/firebase_options.dart';
 
 import 'package:wrestle_predict/ui/home_page.dart';
@@ -40,6 +41,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/signIn': (context) => const SignInPage(),
         '/signUp': (context) => const SignUpPage(),
+        '/leaderboard': (context) => const LeaderboardPage(),
         '/home': (context) => const MyHomePage(title: 'Flutter Demo Home Page'),
       },
     );

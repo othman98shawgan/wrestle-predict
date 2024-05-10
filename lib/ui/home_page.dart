@@ -87,6 +87,13 @@ class _MyHomePageState extends State<MyHomePage> {
           return SingleChildScrollView(
             child: Column(
               children: <Widget>[
+                ElevatedButton(
+                  style: buttonStyle,
+                  onPressed: () {
+                    Navigator.pushNamed(context, "/leaderboard");
+                  },
+                  child: const Text('Leaderboard'),
+                ),
                 currentUser!.isAdmin
                     ? Column(
                         children: [
