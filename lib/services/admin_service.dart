@@ -18,13 +18,11 @@ showNewSeasonDialog(BuildContext context) async {
 
   var confirmMethod = (() async {
     fs.getAllUsers().then((users) {
-      var leaderboard = {for (var user in users) '${user.firstName} ${user.lastName}': 0};
-
       Season newSeason = Season(
         seasonId: const Uuid().v1(),
         seasonName: seasonNameController.text,
         events: [],
-        leaderboard: leaderboard,
+        leaderboard: {for (var user in selectedUsers) user.uid: 0},
         isActive: true,
         users: selectedUsers.map((user) => user.uid).toList(),
       );
@@ -245,7 +243,7 @@ showAddMatchDialog(BuildContext context) async {
   });
 
   AlertDialog alert = AlertDialog(
-      title: const Text('Add New Event'),
+      title: const Text('Add New Match'),
       contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 16.0),
       actions: [
         ElevatedButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
