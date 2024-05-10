@@ -26,6 +26,7 @@ class EventPage extends StatefulWidget {
 
 class _EventPageState extends State<EventPage> {
   List<String> pickedWinner = [];
+  Map<String, String> pickedWinnerMap = {};
   List<DocumentSnapshot> documents = [];
 
   @override
@@ -70,8 +71,11 @@ class _EventPageState extends State<EventPage> {
                                 for (var i = 0; i < documents.length; i++) {
                                   fs.addResultToMatch(documents[i].id, pickedWinner[i]);
                                 }
-                                //Add method for saving winners.
                               } else {
+                                for (var i = 0; i < documents.length; i++) {
+                                  pickedWinnerMap[documents[i].id] = pickedWinner[i];
+                                }
+                                fs.addUserPicksToEvent(widget.event.eventId, currentUser.uid, pickedWinnerMap);
                                 //Add method for saving prediction.
                               }
                               Navigator.pop(context);

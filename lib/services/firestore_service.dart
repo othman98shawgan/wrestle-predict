@@ -38,6 +38,21 @@ class FirestoreService {
     return users;
   }
 
+  Future<List<UserModel>> getAllUsersFromSeason(String seasonId) async {
+    List<UserModel> users = [];
+
+    await seasonsCollection.doc(seasonId).get().then((value) async {
+      Season seaosn = Season.fromJson(value.data() as Map<String, dynamic>);
+      var userIdList = seaosn.users;
+      for (var userId in userIdList) {
+        UserModel user = await getUser(userId);
+        users.add(user);
+      }
+    });
+
+    return users;
+  }
+
   //***** Season Methods *****
   Future<void> addSeason(Season season) async {
     return await seasonsCollection.doc(season.seasonId).set(season.toJson());
@@ -108,6 +123,12 @@ class FirestoreService {
   //Result Methods
   Future<void> addResultToMatch(String matchId, String result) {
     return matchesCollection.doc(matchId).update({"winner": result});
+  }
+
+  Future<void> addUserPicksToEvent(String eventId, String userId, Map<String, String> picks) {
+    return eventsCollection.doc(eventId).update({
+      "userPicks": {userId: picks}
+    });
   }
 
   //Generic Methods

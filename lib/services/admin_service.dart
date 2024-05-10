@@ -133,8 +133,8 @@ showAddEventDialog(BuildContext context) async {
       matches: [],
       seasonId: pickedSeason.seasonId,
       graphicLink: graphic,
-      leaderboard: {for (var user in await fs.getAllUsers()) '${user.firstName} ${user.lastName}': 0},
-      userPicks: {for (var user in await fs.getAllUsers()) '${user.firstName} ${user.lastName}': <String, String>{}},
+      leaderboard: {for (var user in await fs.getAllUsersFromSeason(pickedSeason.seasonId)) user.uid: 0},
+      userPicks: {for (var user in await fs.getAllUsersFromSeason(pickedSeason.seasonId)) user.uid: <String, String>{}},
     );
     fs.addEvent(newEvent);
     Navigator.pop(context);
