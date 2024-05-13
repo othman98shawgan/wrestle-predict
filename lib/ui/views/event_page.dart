@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:wrestle_predict/services/auth.dart';
 import 'package:wrestle_predict/services/firestore_service.dart';
@@ -28,17 +27,29 @@ class _EventPageState extends State<EventPage> {
   List<String> pickedWinner = [];
   Map<String, String> pickedWinnerMap = {};
   List<DocumentSnapshot> documents = [];
+  AuthRepository authRepository = AuthRepository.instance();
 
   @override
   void initState() {
-    pickedWinner = List.filled(widget.event.matches.length, '-');
     super.initState();
+    pickedWinner = List.filled(widget.event.matches.length, '-');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!authRepository.isConnected) {
+        Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     FirestoreService fs = FirestoreService();
-    final authRepository = Provider.of<AuthRepository>(context);
+
+    //Check if user is authenticated
+    if (!authRepository.isConnected) {
+      return const Scaffold(
+        body: Center(),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
