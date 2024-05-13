@@ -116,7 +116,22 @@ class _MyHomePageState extends State<MyHomePage> {
                           ElevatedButton(
                             style: buttonStyle,
                             onPressed: () {
-                              //Add season method-dialog
+                              showSetCurrentSeasonDialog(context);
+                            },
+                            child: const Text('Set currnet Season'),
+                          ),
+                          const SizedBox(height: 10),
+                          ElevatedButton(
+                            style: buttonStyle,
+                            onPressed: () {
+                              showSetCurrentEventDialog(context);
+                            },
+                            child: const Text('Set currnet Event'),
+                          ),
+                          const SizedBox(height: 10),
+                          ElevatedButton(
+                            style: buttonStyle,
+                            onPressed: () {
                               showNewSeasonDialog(context);
                             },
                             child: const Text('Create new Season'),
@@ -125,7 +140,6 @@ class _MyHomePageState extends State<MyHomePage> {
                           ElevatedButton(
                             style: buttonStyle,
                             onPressed: () {
-                              //Add event method-dialog
                               showAddEventDialog(context);
                             },
                             child: const Text('Add Event'),
@@ -134,7 +148,6 @@ class _MyHomePageState extends State<MyHomePage> {
                           ElevatedButton(
                             style: buttonStyle,
                             onPressed: () {
-                              //Add match method-dialog
                               showAddMatchDialog(context);
                             },
                             child: const Text('Add Match'),

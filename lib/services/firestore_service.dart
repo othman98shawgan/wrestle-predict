@@ -286,6 +286,14 @@ class FirestoreService {
     return res;
   }
 
+  Future<void> setCurrentSeason(String seasonId) async {
+    return await globalCollection.doc('currSeason').set({"seasonId": seasonId});
+  }
+
+  Future<void> setCurrentEvent(String eventId) async {
+    return await globalCollection.doc('currEvent').set({"eventId": eventId});
+  }
+
   //Generic Methods
   Future<void> addData(String collection, Map<String, dynamic> data) async {
     await _db.collection(collection).add(data);

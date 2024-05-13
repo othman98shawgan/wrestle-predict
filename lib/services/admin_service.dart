@@ -332,3 +332,155 @@ showAddMatchDialog(BuildContext context) async {
     },
   );
 }
+
+showSetCurrentSeasonDialog(BuildContext context) async {
+  final TextEditingController seasonNameController = TextEditingController(text: "");
+
+  List<Season> seasons = [];
+  String pickedSeasonId = '';
+
+  var confirmMethod = (() async {
+    fs.setCurrentSeason(pickedSeasonId).then((v) {
+      Fluttertoast.showToast(
+          msg: "Current Season have been set!",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
+    });
+
+    Navigator.pop(context);
+  });
+
+  AlertDialog alert = AlertDialog(
+      title: const Text('Season have been set!'),
+      contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 16.0),
+      actions: [
+        ElevatedButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+        TextButton(
+          onPressed: confirmMethod,
+          child: const Text('Confirm'),
+        ),
+      ],
+      content: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+        return FutureBuilder(
+          future: fs.getAllSeasons(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return const LinearProgressIndicator();
+            seasons = snapshot.data!;
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  constraints: const BoxConstraints(minWidth: 400, maxWidth: 600, maxHeight: 100, minHeight: 50),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                  child: DropdownMenu(
+                    width: 360,
+                    controller: seasonNameController,
+                    requestFocusOnTap: true,
+                    label: const Text('Season Name'),
+                    onSelected: (Season? season) {
+                      setState(() {
+                        pickedSeasonId = season!.seasonId;
+                      });
+                    },
+                    dropdownMenuEntries: seasons.map<DropdownMenuEntry<Season>>((Season season) {
+                      return DropdownMenuEntry<Season>(
+                        value: season,
+                        label: season.seasonName,
+                      );
+                    }).toList(),
+                  ),
+                )
+              ],
+            );
+          },
+        );
+      }));
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return alert;
+    },
+  );
+}
+
+showSetCurrentEventDialog(BuildContext context) async {
+  final TextEditingController eventNameController = TextEditingController(text: "");
+
+  List<Event> events = [];
+  String pickedEventId = '';
+
+  var confirmMethod = (() async {
+    fs.setCurrentEvent(pickedEventId).then((v) {
+      Fluttertoast.showToast(
+          msg: "Current Event have been set!",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
+    });
+
+    Navigator.pop(context);
+  });
+
+  AlertDialog alert = AlertDialog(
+      title: const Text('Set Event'),
+      contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 16.0),
+      actions: [
+        ElevatedButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+        TextButton(
+          onPressed: confirmMethod,
+          child: const Text('Confirm'),
+        ),
+      ],
+      content: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+        return FutureBuilder(
+          future: fs.getAllEvents(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return const LinearProgressIndicator();
+            events = snapshot.data!;
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  constraints: const BoxConstraints(minWidth: 400, maxWidth: 600, maxHeight: 100, minHeight: 50),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                  child: DropdownMenu(
+                    width: 360,
+                    controller: eventNameController,
+                    requestFocusOnTap: true,
+                    label: const Text('Event Name'),
+                    onSelected: (Event? event) {
+                      setState(() {
+                        pickedEventId = event!.eventId;
+                      });
+                    },
+                    dropdownMenuEntries: events.map<DropdownMenuEntry<Event>>((Event event) {
+                      return DropdownMenuEntry<Event>(
+                        value: event,
+                        label: event.eventName,
+                      );
+                    }).toList(),
+                  ),
+                )
+              ],
+            );
+          },
+        );
+      }));
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return alert;
+    },
+  );
+}
