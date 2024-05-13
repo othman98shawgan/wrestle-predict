@@ -12,6 +12,7 @@ class FirestoreService {
   final CollectionReference seasonsCollection = FirebaseFirestore.instance.collection('seasons');
   final CollectionReference eventsCollection = FirebaseFirestore.instance.collection('events');
   final CollectionReference matchesCollection = FirebaseFirestore.instance.collection('matches');
+  final CollectionReference globalCollection = FirebaseFirestore.instance.collection('global');
 
   //***** User Methods *****
   Future<void> addUser(UserModel user) async {
@@ -58,6 +59,14 @@ class FirestoreService {
     return await seasonsCollection.doc(season.seasonId).set(season.toJson());
   }
 
+  Future<Season> getSeason(String uid) async {
+    late Season season;
+    await seasonsCollection.doc(uid).get().then((seasonSnapshot) {
+      season = Season.fromJson(seasonSnapshot.data() as Map<String, dynamic>);
+    });
+    return season;
+  }
+
   Future<List<Season>> getAllSeasons() async {
     List<Season> seasons = [];
 
@@ -100,6 +109,14 @@ class FirestoreService {
     });
 
     return events;
+  }
+
+  Future<Event> getEvent(String uid) async {
+    late Event event;
+    await eventsCollection.doc(uid).get().then((snapshot) {
+      event = Event.fromJson(snapshot.data() as Map<String, dynamic>);
+    });
+    return event;
   }
 
   Stream<QuerySnapshot> getEventsStream() {
@@ -181,6 +198,92 @@ class FirestoreService {
         updateSeasonLeaderboard(seasonId, seasonLeaderboard);
       });
     });
+  }
+
+  Future<Map<String, int>> getCurrentSeasonLeaderboard() async {
+    var currSeasonId = '';
+    Map<String, int> resLeaderboard;
+    late Map<String, int> userNameLeaderboard = {};
+    await globalCollection.doc('currSeason').get().then((data) async {
+      currSeasonId = (data.data() as Map<String, dynamic>)['seasonId'];
+      await getSeasonLeaderboard(currSeasonId).then((leaderboard) async {
+        resLeaderboard = leaderboard;
+        for (var key in resLeaderboard.keys) {
+          await getUser(key).then((value) {
+            userNameLeaderboard['${value.firstName} ${value.lastName}'] = resLeaderboard[key]!;
+          });
+        }
+      });
+    });
+    return userNameLeaderboard;
+  }
+
+  Future<Map<String, int>> getCurrentEventLeaderboard() async {
+    var currEventId = '';
+    Map<String, int> resLeaderboard;
+    late Map<String, int> userNameLeaderboard = {};
+    await globalCollection.doc('currEvent').get().then((data) async {
+      currEventId = (data.data() as Map<String, dynamic>)['eventId'];
+      await getEventLeaderboard(currEventId).then((leaderboard) async {
+        resLeaderboard = leaderboard;
+        for (var key in resLeaderboard.keys) {
+          await getUser(key).then((value) {
+            userNameLeaderboard['${value.firstName} ${value.lastName}'] = resLeaderboard[key]!;
+          });
+        }
+      });
+    });
+    return userNameLeaderboard;
+  }
+
+  Future<Map<String, int>> getSeasonLeaderboardToDisplay(Map<String, int> leaderboard) async {
+    Map<String, int> resLeaderboard;
+    late Map<String, int> userNameLeaderboard = {};
+    resLeaderboard = leaderboard;
+    for (var key in resLeaderboard.keys) {
+      await getUser(key).then((value) {
+        userNameLeaderboard['${value.firstName} ${value.lastName}'] = resLeaderboard[key]!;
+      });
+    }
+
+    return userNameLeaderboard;
+  }
+
+  Future<Map<String, int>> getEventLeaderboardToDisplay(Map<String, int> leaderboard) async {
+    Map<String, int> resLeaderboard;
+    late Map<String, int> userNameLeaderboard = {};
+    resLeaderboard = leaderboard;
+    for (var key in resLeaderboard.keys) {
+      await getUser(key).then((value) {
+        userNameLeaderboard['${value.firstName} ${value.lastName}'] = resLeaderboard[key]!;
+      });
+    }
+
+    return userNameLeaderboard;
+  }
+
+  Future<Season> getCurrentSeason() async {
+    var currSeasonId = '';
+    late Season res;
+    await globalCollection.doc('currSeason').get().then((data) async {
+      currSeasonId = (data.data() as Map<String, dynamic>)['seasonId'];
+      await getSeason(currSeasonId).then((season) async {
+        res = season;
+      });
+    });
+    return res;
+  }
+
+  Future<Event> getCurrentEvent() async {
+    var currEventId = '';
+    late Event res;
+    await globalCollection.doc('currEvent').get().then((data) async {
+      currEventId = (data.data() as Map<String, dynamic>)['eventId'];
+      await getEvent(currEventId).then((event) async {
+        res = event;
+      });
+    });
+    return res;
   }
 
   //Generic Methods
