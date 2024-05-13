@@ -41,7 +41,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/signIn': (context) => const SignInPage(),
         '/signUp': (context) => const SignUpPage(),
-        '/leaderboard': (context) => const LeaderboardPage(),
+        '/seasonLeaderboard': (context) => const LeaderboardPage(type: 'Season'),
+        '/eventLeaderboard': (context) => const LeaderboardPage(type: 'Event'),
         '/home': (context) => const MyHomePage(title: 'Flutter Demo Home Page'),
       },
     );

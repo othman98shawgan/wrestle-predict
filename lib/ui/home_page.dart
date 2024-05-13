@@ -87,32 +87,31 @@ class _MyHomePageState extends State<MyHomePage> {
           return SingleChildScrollView(
             child: Column(
               children: <Widget>[
-                ElevatedButton(
-                  style: buttonStyle,
-                  onPressed: () {
-                    Navigator.pushNamed(context, "/leaderboard");
-                  },
-                  child: const Text('Leaderboard'),
+                const SizedBox(height: 30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      style: buttonStyle,
+                      onPressed: () {
+                        Navigator.pushNamed(context, "/seasonLeaderboard");
+                      },
+                      child: const Text('Season Leaderboard'),
+                    ),
+                    const SizedBox(width: 20),
+                    ElevatedButton(
+                      style: buttonStyle,
+                      onPressed: () {
+                        Navigator.pushNamed(context, "/eventLeaderboard");
+                      },
+                      child: const Text('Current Event Leaderboard'),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 10),
                 currentUser!.isAdmin
                     ? Column(
                         children: [
-                          const SizedBox(height: 20),
-                          ElevatedButton(
-                            style: buttonStyle,
-                            onPressed: () {
-                              //Add Update active event method-dialog
-                            },
-                            child: const Text('Update active event'),
-                          ),
-                          const SizedBox(height: 10),
-                          ElevatedButton(
-                            style: buttonStyle,
-                            onPressed: () {
-                              //Add Update non-active event method-dialog
-                            },
-                            child: const Text('Update non-active event'),
-                          ),
                           const SizedBox(height: 10),
                           ElevatedButton(
                             style: buttonStyle,
