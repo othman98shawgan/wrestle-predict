@@ -6,6 +6,7 @@ import 'package:wrestle_predict/ui/auth/sign_up_page.dart';
 import 'package:wrestle_predict/ui/auth/sign_in_page.dart';
 import 'package:wrestle_predict/ui/views/leaderboard_page.dart';
 import 'services/firebase_options.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'package:wrestle_predict/ui/home_page.dart';
 
@@ -15,6 +16,7 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  usePathUrlStrategy();
   runApp(
     MultiProvider(
       providers: [
@@ -39,11 +41,11 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: AuthRepository.instance().isConnected ? '/home' : '/signIn',
       routes: {
+        '/home': (context) => const MyHomePage(),
         '/signIn': (context) => const SignInPage(),
         '/signUp': (context) => const SignUpPage(),
         '/seasonLeaderboard': (context) => const LeaderboardPage(type: 'Season'),
         '/eventLeaderboard': (context) => const LeaderboardPage(type: 'Event'),
-        '/home': (context) => const MyHomePage(title: 'Flutter Demo Home Page'),
       },
     );
   }

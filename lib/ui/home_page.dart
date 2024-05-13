@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:wrestle_predict/services/auth.dart';
-import 'package:provider/provider.dart';
 import 'package:wrestle_predict/services/firestore_service.dart';
 
 import '../models/event_model.dart';
@@ -12,9 +11,7 @@ import 'widgets/event_card.dart';
 bool isMobile = GetPlatform.isMobile;
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -25,17 +22,28 @@ FirebaseFirestore db = FirebaseFirestore.instance;
 class _MyHomePageState extends State<MyHomePage> {
   final counterDoc = db.collection('counter').doc('counter');
   List<DocumentSnapshot> documents = [];
+  AuthRepository authRepository = AuthRepository.instance();
 
   @override
   void initState() {
     super.initState();
+    // final authRepository = Provider.of<AuthRepository>(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!authRepository.isConnected) {
+        Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final FirestoreService fs = FirestoreService();
 
-    final authRepository = Provider.of<AuthRepository>(context);
+    if (!authRepository.isConnected) {
+      return const Scaffold(
+        body: Center(),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(

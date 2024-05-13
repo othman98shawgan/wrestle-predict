@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:wrestle_predict/services/firestore_service.dart';
 
+import '../../services/auth.dart';
+
 bool isMobile = GetPlatform.isMobile;
 
 class LeaderboardPage extends StatefulWidget {
@@ -19,15 +21,29 @@ FirebaseFirestore db = FirebaseFirestore.instance;
 
 class _LeaderboardPageState extends State<LeaderboardPage> {
   List<DocumentSnapshot> documents = [];
+  AuthRepository authRepository = AuthRepository.instance();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!authRepository.isConnected) {
+        Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final FirestoreService fs = FirestoreService();
+
+    //Check if user is authenticated
+    if (!authRepository.isConnected) {
+      return const Scaffold(
+        body: Center(),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: kToolbarHeight + 20,
