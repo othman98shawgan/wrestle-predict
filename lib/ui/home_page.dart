@@ -96,26 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Column(
               children: <Widget>[
                 const SizedBox(height: 30),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      style: buttonStyle,
-                      onPressed: () {
-                        Navigator.pushNamed(context, "/seasonLeaderboard");
-                      },
-                      child: const Text('Season Leaderboard'),
-                    ),
-                    const SizedBox(width: 20),
-                    ElevatedButton(
-                      style: buttonStyle,
-                      onPressed: () {
-                        Navigator.pushNamed(context, "/eventLeaderboard");
-                      },
-                      child: const Text('Current Event Leaderboard'),
-                    ),
-                  ],
-                ),
+                _buildLeaderboardButtons(context, buttonStyle),
                 const SizedBox(height: 10),
                 currentUser!.isAdmin
                     ? Column(
@@ -210,5 +191,50 @@ Widget _buildEventCardItem(BuildContext context, DocumentSnapshot snapshot) {
   final event = Event.fromSnapshot(snapshot);
   return EventCard(
     event: event,
+  );
+}
+
+Widget _buildLeaderboardButtons(BuildContext context, ButtonStyle buttonStyle) {
+  if (isMobile) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ElevatedButton(
+          style: buttonStyle,
+          onPressed: () {
+            Navigator.pushNamed(context, "/seasonLeaderboard");
+          },
+          child: const Text('Season Leaderboard'),
+        ),
+        const SizedBox(height: 20),
+        ElevatedButton(
+          style: buttonStyle,
+          onPressed: () {
+            Navigator.pushNamed(context, "/eventLeaderboard");
+          },
+          child: const Text('Current Event Leaderboard'),
+        ),
+      ],
+    );
+  }
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      ElevatedButton(
+        style: buttonStyle,
+        onPressed: () {
+          Navigator.pushNamed(context, "/seasonLeaderboard");
+        },
+        child: const Text('Season Leaderboard'),
+      ),
+      const SizedBox(width: 20),
+      ElevatedButton(
+        style: buttonStyle,
+        onPressed: () {
+          Navigator.pushNamed(context, "/eventLeaderboard");
+        },
+        child: const Text('Current Event Leaderboard'),
+      ),
+    ],
   );
 }

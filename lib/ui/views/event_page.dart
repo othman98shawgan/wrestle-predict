@@ -33,6 +33,9 @@ class _EventPageState extends State<EventPage> {
   void initState() {
     super.initState();
     pickedWinner = List.filled(widget.event.matches.length, '-');
+    for (var match in widget.event.matches) {
+      pickedWinnerMap[match] = widget.event.userPicks[authRepository.user!.uid]![match];
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!authRepository.isConnected) {
         Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
@@ -96,7 +99,6 @@ class _EventPageState extends State<EventPage> {
                                 });
 
                                 fs.updateLeaderboard(event.eventId, event.seasonId, event.leaderboard);
-                                //Update event and Season Leaderboard
                               } else {
                                 fs.addUserPicksToEvent(event.eventId, currentUser.uid, pickedWinnerMap);
                               }
@@ -134,8 +136,8 @@ class _EventPageState extends State<EventPage> {
       shrinkWrap: true,
       crossAxisCount: isMobile ? 1 : 3,
       childAspectRatio: 1,
-      padding: const EdgeInsets.all(12.0),
-      mainAxisSpacing: 10.0,
+      padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 36.0),
+      mainAxisSpacing: 20.0,
       crossAxisSpacing: 10.0,
       children: List<Widget>.generate(matches.length, (index) {
         return GridTile(
@@ -147,8 +149,12 @@ class _EventPageState extends State<EventPage> {
 
   Widget _buildMatchCardItem(BuildContext context, DocumentSnapshot snapshot, int matchIndex) {
     final match = Match.fromSnapshot(snapshot);
+    double width = MediaQuery.of(context).size.width;
+    var widthWithoutPadding = width - 24 * 2; //Without GridView padding
+    var cardWidth = widthWithoutPadding / (isMobile ? 1 : 3);
+
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: MainAxisSize.max,
       children: [
         Expanded(
           flex: 2,
@@ -156,34 +162,56 @@ class _EventPageState extends State<EventPage> {
             match: match,
           ),
         ),
-        Expanded(
-          flex: 1,
-          child: GridView.count(
-            physics: const NeverScrollableScrollPhysics(),
-            scrollDirection: Axis.vertical,
-            shrinkWrap: true,
-            crossAxisCount: match.participants.length >= 4 ? 2 : 1,
-            childAspectRatio: match.participants.length >= 4 ? 5 : 10,
-            padding: const EdgeInsets.all(12.0),
-            crossAxisSpacing: 10.0,
-            mainAxisSpacing: 10.0,
-            children: List<Widget>.generate(match.participants.length, (index) {
-              return GridTile(
-                child: RadioListTile(
-                  visualDensity: VisualDensity.compact,
-                  title: Text(match.participants[index]),
-                  groupValue: pickedWinner[matchIndex],
-                  value: match.participants[index],
-                  onChanged: (value) {
-                    setState(() {
-                      pickedWinner[matchIndex] = value.toString();
-                    });
-                  },
+        match.participants.length >= 3
+            ? Expanded(
+                flex: 1,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(48, 0, 48, 0),
+                    child: DropdownMenu<String>(
+                      width: cardWidth * 0.6,
+                      enableSearch: false,
+                      enableFilter: false,
+                      label: const Text('Winner', textAlign: TextAlign.center),
+                      initialSelection: pickedWinnerMap[match.matchId],
+                      onSelected: (String? value) {
+                        pickedWinnerMap[match.matchId] = value!;
+                        pickedWinner[matchIndex] = value;
+                      },
+                      dropdownMenuEntries: match.participants.map<DropdownMenuEntry<String>>((String value) {
+                        return DropdownMenuEntry<String>(value: value, label: value);
+                      }).toList(),
+                    ),
+                  ),
                 ),
-              );
-            }),
-          ),
-        ),
+              )
+            : Expanded(
+                flex: 1,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(48, 0, 48, 0),
+                    child: ListView.builder(
+                      itemBuilder: (context, index) {
+                        return RadioListTile(
+                          visualDensity: VisualDensity.compact,
+                          title: Text(match.participants[index]),
+                          groupValue: pickedWinnerMap[match.matchId],
+                          value: match.participants[index],
+                          onChanged: (value) {
+                            setState(() {
+                              pickedWinner[matchIndex] = value.toString();
+                              pickedWinnerMap[match.matchId] = value.toString();
+                            });
+                          },
+                        );
+                      },
+                      itemCount: match.participants.length,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                    ),
+                  ),
+                ),
+              )
       ],
     );
   }
@@ -191,6 +219,11 @@ class _EventPageState extends State<EventPage> {
   Widget _buildAdminMatchCardItem(BuildContext context, DocumentSnapshot snapshot, int matchIndex) {
     final match = Match.fromSnapshot(snapshot);
     pickedWinner[matchIndex] = match.winner;
+
+    double width = MediaQuery.of(context).size.width;
+    var widthWithoutPadding = width - 24 * 2; //Without GridView padding
+    var cardWidth = widthWithoutPadding / (isMobile ? 1 : 3);
+
     return Column(mainAxisSize: MainAxisSize.min, children: [
       Expanded(
         flex: 2,
@@ -206,6 +239,7 @@ class _EventPageState extends State<EventPage> {
             child: DropdownMenu<String>(
               enableSearch: false,
               enableFilter: false,
+              width: cardWidth * 0.6,
               label: const Text('Winner'),
               initialSelection: pickedWinner[matchIndex],
               onSelected: (String? value) {
