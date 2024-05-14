@@ -6,6 +6,7 @@ import 'package:wrestle_predict/services/firestore_service.dart';
 
 import '../models/event_model.dart';
 import '../services/admin_service.dart';
+import 'views/event_page.dart';
 import 'widgets/event_card.dart';
 
 bool isMobile = GetPlatform.isMobile;
@@ -23,6 +24,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final counterDoc = db.collection('counter').doc('counter');
   List<DocumentSnapshot> documents = [];
   AuthRepository authRepository = AuthRepository.instance();
+  late Event currentEvent;
 
   @override
   void initState() {
@@ -32,6 +34,11 @@ class _MyHomePageState extends State<MyHomePage> {
       if (!authRepository.isConnected) {
         Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
       }
+      fs.getCurrentEvent().then((value) {
+        setState(() {
+          currentEvent = value;
+        });
+      });
     });
   }
 
@@ -166,37 +173,57 @@ class _MyHomePageState extends State<MyHomePage> {
     padding: const EdgeInsets.symmetric(vertical: 16),
     foregroundColor: Colors.white,
   );
-}
 
-Widget _buildEventsGridView(BuildContext context, List<DocumentSnapshot>? snapshot) {
-  final snapshotEvents = snapshot!.map((data) => _buildEventCardItem(context, data)).toList();
-  return GridView.count(
-    physics: const ScrollPhysics(),
-    scrollDirection: Axis.vertical,
-    shrinkWrap: true,
-    crossAxisCount: isMobile ? 2 : 6,
-    childAspectRatio: 0.7,
-    padding: const EdgeInsets.all(12.0),
-    mainAxisSpacing: 10.0,
-    crossAxisSpacing: 10.0,
-    children: List<Widget>.generate(snapshotEvents.length, (index) {
-      return GridTile(
-        child: snapshotEvents[index],
+  Widget _buildEventsGridView(BuildContext context, List<DocumentSnapshot>? snapshot) {
+    final snapshotEvents = snapshot!.map((data) => _buildEventCardItem(context, data)).toList();
+    return GridView.count(
+      physics: const ScrollPhysics(),
+      scrollDirection: Axis.vertical,
+      shrinkWrap: true,
+      crossAxisCount: isMobile ? 2 : 6,
+      childAspectRatio: 0.7,
+      padding: const EdgeInsets.all(12.0),
+      mainAxisSpacing: 10.0,
+      crossAxisSpacing: 10.0,
+      children: List<Widget>.generate(snapshotEvents.length, (index) {
+        return GridTile(
+          child: snapshotEvents[index],
+        );
+      }),
+    );
+  }
+
+  Widget _buildEventCardItem(BuildContext context, DocumentSnapshot snapshot) {
+    final event = Event.fromSnapshot(snapshot);
+    return EventCard(
+      event: event,
+    );
+  }
+
+  Widget _buildLeaderboardButtons(BuildContext context, ButtonStyle buttonStyle) {
+    if (isMobile) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ElevatedButton(
+            style: buttonStyle,
+            onPressed: () {
+              Navigator.pushNamed(context, "/seasonLeaderboard");
+            },
+            child: const Text('Season Leaderboard'),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            style: buttonStyle,
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => EventPage(event: currentEvent)));
+            },
+            child: const Text('Current Event'),
+          ),
+        ],
       );
-    }),
-  );
-}
-
-Widget _buildEventCardItem(BuildContext context, DocumentSnapshot snapshot) {
-  final event = Event.fromSnapshot(snapshot);
-  return EventCard(
-    event: event,
-  );
-}
-
-Widget _buildLeaderboardButtons(BuildContext context, ButtonStyle buttonStyle) {
-  if (isMobile) {
-    return Column(
+    }
+    return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         ElevatedButton(
@@ -206,35 +233,15 @@ Widget _buildLeaderboardButtons(BuildContext context, ButtonStyle buttonStyle) {
           },
           child: const Text('Season Leaderboard'),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(width: 20),
         ElevatedButton(
           style: buttonStyle,
           onPressed: () {
-            Navigator.pushNamed(context, "/eventLeaderboard");
+            Navigator.push(context, MaterialPageRoute(builder: (context) => EventPage(event: currentEvent)));
           },
-          child: const Text('Current Event Leaderboard'),
+          child: const Text('Current Event'),
         ),
       ],
     );
   }
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      ElevatedButton(
-        style: buttonStyle,
-        onPressed: () {
-          Navigator.pushNamed(context, "/seasonLeaderboard");
-        },
-        child: const Text('Season Leaderboard'),
-      ),
-      const SizedBox(width: 20),
-      ElevatedButton(
-        style: buttonStyle,
-        onPressed: () {
-          Navigator.pushNamed(context, "/eventLeaderboard");
-        },
-        child: const Text('Current Event Leaderboard'),
-      ),
-    ],
-  );
 }
