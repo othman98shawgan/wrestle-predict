@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import 'package:wrestle_predict/services/auth.dart';
 import 'package:wrestle_predict/services/firestore_service.dart';
 import 'package:collection/collection.dart';
+import 'package:wrestle_predict/ui/views/leaderboard_page.dart';
 
 import '../../models/event_model.dart';
 import '../../models/match.dart';
@@ -54,9 +55,17 @@ class _EventPageState extends State<EventPage> {
       );
     }
 
+    ButtonStyle buttonStyle = ElevatedButton.styleFrom(
+      minimumSize: const Size(250, 0),
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      foregroundColor: Colors.white,
+    );
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.event.eventName),
+        toolbarHeight: kToolbarHeight + 20,
+        title: Text(widget.event.eventName, style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+        centerTitle: true,
       ),
       body: FutureBuilder(
           future: fs.getUser(authRepository.user!.uid),
@@ -73,6 +82,18 @@ class _EventPageState extends State<EventPage> {
                       documents = snapshot.data!.docs;
                       return Column(
                         children: [
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                              style: buttonStyle,
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            LeaderboardPage(type: 'Event', eventId: widget.event.eventId)));
+                              },
+                              child: const Text('Event Leaderboard')),
+                          const SizedBox(height: 20),
                           _buildMatchessGridView(context, documents.isNotEmpty ? documents : [], currentUser!),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
