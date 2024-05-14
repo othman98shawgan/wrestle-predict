@@ -114,15 +114,15 @@ class _SignInPageState extends State<SignInPage> {
                 style: TextStyle(fontSize: 16),
               ),
             ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(foregroundColor: Colors.black, backgroundColor: Colors.green),
-              onPressed: () async {
-                await auth
-                    .signUp(email, password, firstName, lastName)
-                    .whenComplete(() => Navigator.pushReplacementNamed(context, '/home'));
-              },
-              child: const Text('Sign Up'),
-            ),
+            // ElevatedButton(
+            //   style: ElevatedButton.styleFrom(foregroundColor: Colors.black, backgroundColor: Colors.green),
+            //   onPressed: () async {
+            //     await auth
+            //         .signUp(email, password, firstName, lastName)
+            //         .whenComplete(() => Navigator.pushReplacementNamed(context, '/home'));
+            //   },
+            //   child: const Text('Sign Up'),
+            // ),
           ],
         ),
       ),
