@@ -99,7 +99,6 @@ class _EventPageState extends State<EventPage> {
                                 });
 
                                 fs.updateLeaderboard(event.eventId, event.seasonId, event.leaderboard);
-                                //Update event and Season Leaderboard
                               } else {
                                 fs.addUserPicksToEvent(event.eventId, currentUser.uid, pickedWinnerMap);
                               }
@@ -137,7 +136,7 @@ class _EventPageState extends State<EventPage> {
       shrinkWrap: true,
       crossAxisCount: isMobile ? 1 : 3,
       childAspectRatio: 1,
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 36.0),
       mainAxisSpacing: 20.0,
       crossAxisSpacing: 10.0,
       children: List<Widget>.generate(matches.length, (index) {
@@ -150,6 +149,10 @@ class _EventPageState extends State<EventPage> {
 
   Widget _buildMatchCardItem(BuildContext context, DocumentSnapshot snapshot, int matchIndex) {
     final match = Match.fromSnapshot(snapshot);
+    double width = MediaQuery.of(context).size.width;
+    var widthWithoutPadding = width - 24 * 2; //Without GridView padding
+    var cardWidth = widthWithoutPadding / (isMobile ? 1 : 3);
+
     return Column(
       mainAxisSize: MainAxisSize.max,
       children: [
@@ -166,7 +169,7 @@ class _EventPageState extends State<EventPage> {
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(48, 0, 48, 0),
                     child: DropdownMenu<String>(
-                      width: 200,
+                      width: cardWidth * 0.6,
                       enableSearch: false,
                       enableFilter: false,
                       label: const Text('Winner', textAlign: TextAlign.center),
@@ -216,6 +219,11 @@ class _EventPageState extends State<EventPage> {
   Widget _buildAdminMatchCardItem(BuildContext context, DocumentSnapshot snapshot, int matchIndex) {
     final match = Match.fromSnapshot(snapshot);
     pickedWinner[matchIndex] = match.winner;
+
+    double width = MediaQuery.of(context).size.width;
+    var widthWithoutPadding = width - 24 * 2; //Without GridView padding
+    var cardWidth = widthWithoutPadding / (isMobile ? 1 : 3);
+
     return Column(mainAxisSize: MainAxisSize.min, children: [
       Expanded(
         flex: 2,
@@ -231,6 +239,7 @@ class _EventPageState extends State<EventPage> {
             child: DropdownMenu<String>(
               enableSearch: false,
               enableFilter: false,
+              width: cardWidth * 0.6,
               label: const Text('Winner'),
               initialSelection: pickedWinner[matchIndex],
               onSelected: (String? value) {
