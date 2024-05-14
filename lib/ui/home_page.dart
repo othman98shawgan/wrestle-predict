@@ -147,6 +147,14 @@ class _MyHomePageState extends State<MyHomePage> {
                               showAddMatchDialog(context);
                             },
                             child: const Text('Add Match'),
+                          ),
+                          const SizedBox(height: 10),
+                          ElevatedButton(
+                            style: buttonStyle,
+                            onPressed: () {
+                              showAddUserDialog(context);
+                            },
+                            child: const Text('Add User'),
                           )
                         ],
                       )
