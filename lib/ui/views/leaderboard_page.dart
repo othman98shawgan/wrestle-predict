@@ -9,9 +9,10 @@ import '../../services/auth.dart';
 bool isMobile = GetPlatform.isMobile;
 
 class LeaderboardPage extends StatefulWidget {
-  const LeaderboardPage({super.key, required this.type});
+  const LeaderboardPage({super.key, required this.type, this.eventId});
 
   final String type;
+  final String? eventId;
 
   @override
   State<LeaderboardPage> createState() => _LeaderboardPageState();
@@ -51,7 +52,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
         centerTitle: true,
       ),
       body: FutureBuilder(
-        future: widget.type == 'Season' ? fs.getCurrentSeason() : fs.getCurrentEvent(),
+        future: widget.type == 'Season' ? fs.getCurrentSeason() : fs.getEvent(widget.eventId!),
         builder: (context, snapshot) {
           if (!snapshot.hasData) return const LinearProgressIndicator();
           var data = snapshot.data ?? {};
