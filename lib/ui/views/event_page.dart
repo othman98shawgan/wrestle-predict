@@ -34,14 +34,17 @@ class _EventPageState extends State<EventPage> {
   void initState() {
     super.initState();
     pickedWinner = List.filled(widget.event.matches.length, '-');
-    for (var match in widget.event.matches) {
-      pickedWinnerMap[match] = widget.event.userPicks[authRepository.user!.uid]![match];
-    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!authRepository.isConnected) {
         Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
       }
     });
+  }
+
+  void fillPickedWinnerMap() {
+    for (var match in widget.event.matches) {
+      pickedWinnerMap[match] = widget.event.userPicks[authRepository.user!.uid]![match];
+    }
   }
 
   @override
@@ -72,6 +75,10 @@ class _EventPageState extends State<EventPage> {
           builder: (context, snapshot) {
             if (!snapshot.hasData) return const LinearProgressIndicator();
             var currentUser = snapshot.data;
+
+            if (!currentUser!.isAdmin) {
+              fillPickedWinnerMap();
+            }
             return SingleChildScrollView(
               child: Column(
                 children: [
@@ -94,7 +101,7 @@ class _EventPageState extends State<EventPage> {
                               },
                               child: const Text('Event Leaderboard')),
                           const SizedBox(height: 20),
-                          _buildMatchessGridView(context, documents.isNotEmpty ? documents : [], currentUser!),
+                          _buildMatchessGridView(context, documents.isNotEmpty ? documents : [], currentUser),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
