@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import 'package:wrestle_predict/services/auth.dart';
 import 'package:wrestle_predict/services/firestore_service.dart';
 import 'package:collection/collection.dart';
+import 'package:wrestle_predict/ui/views/leaderboard_page.dart';
 
 import '../../models/event_model.dart';
 import '../../models/match.dart';
@@ -33,14 +34,17 @@ class _EventPageState extends State<EventPage> {
   void initState() {
     super.initState();
     pickedWinner = List.filled(widget.event.matches.length, '-');
-    for (var match in widget.event.matches) {
-      pickedWinnerMap[match] = widget.event.userPicks[authRepository.user!.uid]![match];
-    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!authRepository.isConnected) {
         Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
       }
     });
+  }
+
+  void fillPickedWinnerMap() {
+    for (var match in widget.event.matches) {
+      pickedWinnerMap[match] = widget.event.userPicks[authRepository.user!.uid]![match];
+    }
   }
 
   @override
@@ -54,15 +58,27 @@ class _EventPageState extends State<EventPage> {
       );
     }
 
+    ButtonStyle buttonStyle = ElevatedButton.styleFrom(
+      minimumSize: const Size(250, 0),
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      foregroundColor: Colors.white,
+    );
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.event.eventName),
+        toolbarHeight: kToolbarHeight + 20,
+        title: Text(widget.event.eventName, style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+        centerTitle: true,
       ),
       body: FutureBuilder(
           future: fs.getUser(authRepository.user!.uid),
           builder: (context, snapshot) {
             if (!snapshot.hasData) return const LinearProgressIndicator();
             var currentUser = snapshot.data;
+
+            if (!currentUser!.isAdmin) {
+              fillPickedWinnerMap();
+            }
             return SingleChildScrollView(
               child: Column(
                 children: [
@@ -73,7 +89,19 @@ class _EventPageState extends State<EventPage> {
                       documents = snapshot.data!.docs;
                       return Column(
                         children: [
-                          _buildMatchessGridView(context, documents.isNotEmpty ? documents : [], currentUser!),
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                              style: buttonStyle,
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            LeaderboardPage(type: 'Event', eventId: widget.event.eventId)));
+                              },
+                              child: const Text('Event Leaderboard')),
+                          const SizedBox(height: 20),
+                          _buildMatchessGridView(context, documents.isNotEmpty ? documents : [], currentUser),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),

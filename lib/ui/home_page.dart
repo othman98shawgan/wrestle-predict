@@ -1,11 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:wrestle_predict/services/auth.dart';
 import 'package:wrestle_predict/services/firestore_service.dart';
 
 import '../models/event_model.dart';
+import '../models/user_model.dart';
 import '../services/admin_service.dart';
+import 'views/event_page.dart';
 import 'widgets/event_card.dart';
 
 bool isMobile = GetPlatform.isMobile;
@@ -23,6 +26,9 @@ class _MyHomePageState extends State<MyHomePage> {
   final counterDoc = db.collection('counter').doc('counter');
   List<DocumentSnapshot> documents = [];
   AuthRepository authRepository = AuthRepository.instance();
+  late Event currentEvent;
+  late UserModel currentUser;
+  bool isUserConnectedToCurrentEvent = false;
 
   @override
   void initState() {
@@ -32,6 +38,18 @@ class _MyHomePageState extends State<MyHomePage> {
       if (!authRepository.isConnected) {
         Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
       }
+      fs.getCurrentEvent().then((value) {
+        setState(() {
+          currentEvent = value;
+        });
+        fs.getSeason(currentEvent.seasonId).then((value) {
+          if (value.users.contains(currentUser.uid)) {
+            setState(() {
+              isUserConnectedToCurrentEvent = true;
+            });
+          }
+        });
+      });
     });
   }
 
@@ -91,14 +109,14 @@ class _MyHomePageState extends State<MyHomePage> {
         future: fs.getUser(authRepository.user!.uid),
         builder: (context, snapshot) {
           if (!snapshot.hasData) return const LinearProgressIndicator();
-          var currentUser = snapshot.data;
+          currentUser = snapshot.data!;
           return SingleChildScrollView(
             child: Column(
               children: <Widget>[
                 const SizedBox(height: 30),
                 _buildLeaderboardButtons(context, buttonStyle),
                 const SizedBox(height: 10),
-                currentUser!.isAdmin
+                currentUser.isAdmin
                     ? Column(
                         children: [
                           const SizedBox(height: 10),
@@ -140,6 +158,14 @@ class _MyHomePageState extends State<MyHomePage> {
                               showAddMatchDialog(context);
                             },
                             child: const Text('Add Match'),
+                          ),
+                          const SizedBox(height: 10),
+                          ElevatedButton(
+                            style: buttonStyle,
+                            onPressed: () {
+                              showAddUserDialog(context);
+                            },
+                            child: const Text('Add User'),
                           )
                         ],
                       )
@@ -166,37 +192,70 @@ class _MyHomePageState extends State<MyHomePage> {
     padding: const EdgeInsets.symmetric(vertical: 16),
     foregroundColor: Colors.white,
   );
-}
 
-Widget _buildEventsGridView(BuildContext context, List<DocumentSnapshot>? snapshot) {
-  final snapshotEvents = snapshot!.map((data) => _buildEventCardItem(context, data)).toList();
-  return GridView.count(
-    physics: const ScrollPhysics(),
-    scrollDirection: Axis.vertical,
-    shrinkWrap: true,
-    crossAxisCount: isMobile ? 2 : 6,
-    childAspectRatio: 0.7,
-    padding: const EdgeInsets.all(12.0),
-    mainAxisSpacing: 10.0,
-    crossAxisSpacing: 10.0,
-    children: List<Widget>.generate(snapshotEvents.length, (index) {
-      return GridTile(
-        child: snapshotEvents[index],
+  Widget _buildEventsGridView(BuildContext context, List<DocumentSnapshot>? snapshot) {
+    final snapshotEvents = snapshot!.map((data) => _buildEventCardItem(context, data)).toList();
+    return GridView.count(
+      physics: const ScrollPhysics(),
+      scrollDirection: Axis.vertical,
+      shrinkWrap: true,
+      crossAxisCount: isMobile ? 2 : 6,
+      childAspectRatio: 0.7,
+      padding: const EdgeInsets.all(12.0),
+      mainAxisSpacing: 10.0,
+      crossAxisSpacing: 10.0,
+      children: List<Widget>.generate(snapshotEvents.length, (index) {
+        return GridTile(
+          child: snapshotEvents[index],
+        );
+      }),
+    );
+  }
+
+  Widget _buildEventCardItem(BuildContext context, DocumentSnapshot snapshot) {
+    final event = Event.fromSnapshot(snapshot);
+    return EventCard(
+      event: event,
+      user: currentUser,
+    );
+  }
+
+  Widget _buildLeaderboardButtons(BuildContext context, ButtonStyle buttonStyle) {
+    if (isMobile) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ElevatedButton(
+            style: buttonStyle,
+            onPressed: () {
+              Navigator.pushNamed(context, "/seasonLeaderboard");
+            },
+            child: const Text('Season Leaderboard'),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            style: buttonStyle,
+            onPressed: () {
+              if (isUserConnectedToCurrentEvent) {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => EventPage(event: currentEvent)));
+              } else {
+                Fluttertoast.showToast(
+                    msg: "Not connected to this event. Please ask Admin to add you.",
+                    toastLength: Toast.LENGTH_LONG,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIosWeb: 2,
+                    webBgColor: '#C80000',
+                    webPosition: 'center',
+                    textColor: Colors.white,
+                    fontSize: 16.0);
+              }
+            },
+            child: const Text('Current Event'),
+          ),
+        ],
       );
-    }),
-  );
-}
-
-Widget _buildEventCardItem(BuildContext context, DocumentSnapshot snapshot) {
-  final event = Event.fromSnapshot(snapshot);
-  return EventCard(
-    event: event,
-  );
-}
-
-Widget _buildLeaderboardButtons(BuildContext context, ButtonStyle buttonStyle) {
-  if (isMobile) {
-    return Column(
+    }
+    return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         ElevatedButton(
@@ -206,35 +265,27 @@ Widget _buildLeaderboardButtons(BuildContext context, ButtonStyle buttonStyle) {
           },
           child: const Text('Season Leaderboard'),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(width: 20),
         ElevatedButton(
           style: buttonStyle,
           onPressed: () {
-            Navigator.pushNamed(context, "/eventLeaderboard");
+            if (isUserConnectedToCurrentEvent) {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => EventPage(event: currentEvent)));
+            } else {
+              Fluttertoast.showToast(
+                  msg: "Not connected to this event. Please ask Admin to add you.",
+                  toastLength: Toast.LENGTH_LONG,
+                  gravity: ToastGravity.BOTTOM,
+                  timeInSecForIosWeb: 2,
+                  webBgColor: '#C80000',
+                  webPosition: 'center',
+                  textColor: Colors.white,
+                  fontSize: 16.0);
+            }
           },
-          child: const Text('Current Event Leaderboard'),
+          child: const Text('Current Event'),
         ),
       ],
     );
   }
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      ElevatedButton(
-        style: buttonStyle,
-        onPressed: () {
-          Navigator.pushNamed(context, "/seasonLeaderboard");
-        },
-        child: const Text('Season Leaderboard'),
-      ),
-      const SizedBox(width: 20),
-      ElevatedButton(
-        style: buttonStyle,
-        onPressed: () {
-          Navigator.pushNamed(context, "/eventLeaderboard");
-        },
-        child: const Text('Current Event Leaderboard'),
-      ),
-    ],
-  );
 }
