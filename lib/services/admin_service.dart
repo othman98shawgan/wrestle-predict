@@ -333,6 +333,111 @@ showAddMatchDialog(BuildContext context) async {
   );
 }
 
+showAddUserDialog(BuildContext context) async {
+  final TextEditingController seasonNameController = TextEditingController(text: "");
+  final TextEditingController userNameController = TextEditingController(text: "");
+
+  List<UserModel> users;
+  late UserModel pickedUser;
+
+  List<Season> seasons;
+  late Season pickedSeason;
+
+  var confirmMethod = (() async {
+    fs.addUserToSeason(pickedUser, pickedSeason).then((v) {
+      Fluttertoast.showToast(
+          msg: "User Added to Season!",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
+    });
+
+    Navigator.pop(context);
+  });
+
+  AlertDialog alert = AlertDialog(
+      title: const Text('Add User to Season'),
+      contentPadding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 16.0),
+      actions: [
+        ElevatedButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+        TextButton(
+          onPressed: confirmMethod,
+          child: const Text('Confirm'),
+        ),
+      ],
+      content: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+        return FutureBuilder(
+          future: Future.wait([fs.getAllUsers(), fs.getAllSeasons()]),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return const LinearProgressIndicator();
+            users = snapshot.data![0] as List<UserModel>;
+            seasons = snapshot.data![1] as List<Season>;
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 20),
+                Container(
+                  constraints: const BoxConstraints(minWidth: 400, maxWidth: 600, maxHeight: 100, minHeight: 50),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                  child: DropdownMenu(
+                    width: 360,
+                    controller: seasonNameController,
+                    requestFocusOnTap: true,
+                    label: const Text('Season Name'),
+                    onSelected: (Season? season) {
+                      setState(() {
+                        pickedSeason = season!;
+                      });
+                    },
+                    dropdownMenuEntries: seasons.map<DropdownMenuEntry<Season>>((Season season) {
+                      return DropdownMenuEntry<Season>(
+                        value: season,
+                        label: season.seasonName,
+                      );
+                    }).toList(),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  constraints: const BoxConstraints(minWidth: 400, maxWidth: 600, maxHeight: 100, minHeight: 50),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                  child: DropdownMenu(
+                    width: 360,
+                    controller: userNameController,
+                    requestFocusOnTap: true,
+                    label: const Text('User Name'),
+                    onSelected: (UserModel? user) {
+                      setState(() {
+                        pickedUser = user!;
+                      });
+                    },
+                    dropdownMenuEntries: users.map<DropdownMenuEntry<UserModel>>((UserModel user) {
+                      return DropdownMenuEntry<UserModel>(
+                        value: user,
+                        label: '${user.firstName} ${user.lastName}',
+                      );
+                    }).toList(),
+                  ),
+                )
+              ],
+            );
+          },
+        );
+      }));
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return alert;
+    },
+  );
+}
+
 showSetCurrentSeasonDialog(BuildContext context) async {
   final TextEditingController seasonNameController = TextEditingController(text: "");
 

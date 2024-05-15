@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:wrestle_predict/services/auth.dart';
 import 'package:wrestle_predict/services/firestore_service.dart';
 
 import '../models/event_model.dart';
+import '../models/user_model.dart';
 import '../services/admin_service.dart';
 import 'views/event_page.dart';
 import 'widgets/event_card.dart';
@@ -25,6 +27,8 @@ class _MyHomePageState extends State<MyHomePage> {
   List<DocumentSnapshot> documents = [];
   AuthRepository authRepository = AuthRepository.instance();
   late Event currentEvent;
+  late UserModel currentUser;
+  bool isUserConnectedToCurrentEvent = false;
 
   @override
   void initState() {
@@ -37,6 +41,13 @@ class _MyHomePageState extends State<MyHomePage> {
       fs.getCurrentEvent().then((value) {
         setState(() {
           currentEvent = value;
+        });
+        fs.getSeason(currentEvent.seasonId).then((value) {
+          if (value.users.contains(currentUser.uid)) {
+            setState(() {
+              isUserConnectedToCurrentEvent = true;
+            });
+          }
         });
       });
     });
@@ -98,14 +109,14 @@ class _MyHomePageState extends State<MyHomePage> {
         future: fs.getUser(authRepository.user!.uid),
         builder: (context, snapshot) {
           if (!snapshot.hasData) return const LinearProgressIndicator();
-          var currentUser = snapshot.data;
+          currentUser = snapshot.data!;
           return SingleChildScrollView(
             child: Column(
               children: <Widget>[
                 const SizedBox(height: 30),
                 _buildLeaderboardButtons(context, buttonStyle),
                 const SizedBox(height: 10),
-                currentUser!.isAdmin
+                currentUser.isAdmin
                     ? Column(
                         children: [
                           const SizedBox(height: 10),
@@ -147,6 +158,14 @@ class _MyHomePageState extends State<MyHomePage> {
                               showAddMatchDialog(context);
                             },
                             child: const Text('Add Match'),
+                          ),
+                          const SizedBox(height: 10),
+                          ElevatedButton(
+                            style: buttonStyle,
+                            onPressed: () {
+                              showAddUserDialog(context);
+                            },
+                            child: const Text('Add User'),
                           )
                         ],
                       )
@@ -197,6 +216,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final event = Event.fromSnapshot(snapshot);
     return EventCard(
       event: event,
+      user: currentUser,
     );
   }
 
@@ -216,7 +236,19 @@ class _MyHomePageState extends State<MyHomePage> {
           ElevatedButton(
             style: buttonStyle,
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => EventPage(event: currentEvent)));
+              if (isUserConnectedToCurrentEvent) {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => EventPage(event: currentEvent)));
+              } else {
+                Fluttertoast.showToast(
+                    msg: "Not connected to this event. Please ask Admin to add you.",
+                    toastLength: Toast.LENGTH_LONG,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIosWeb: 2,
+                    webBgColor: '#C80000',
+                    webPosition: 'center',
+                    textColor: Colors.white,
+                    fontSize: 16.0);
+              }
             },
             child: const Text('Current Event'),
           ),
@@ -237,7 +269,19 @@ class _MyHomePageState extends State<MyHomePage> {
         ElevatedButton(
           style: buttonStyle,
           onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => EventPage(event: currentEvent)));
+            if (isUserConnectedToCurrentEvent) {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => EventPage(event: currentEvent)));
+            } else {
+              Fluttertoast.showToast(
+                  msg: "Not connected to this event. Please ask Admin to add you.",
+                  toastLength: Toast.LENGTH_LONG,
+                  gravity: ToastGravity.BOTTOM,
+                  timeInSecForIosWeb: 2,
+                  webBgColor: '#C80000',
+                  webPosition: 'center',
+                  textColor: Colors.white,
+                  fontSize: 16.0);
+            }
           },
           child: const Text('Current Event'),
         ),

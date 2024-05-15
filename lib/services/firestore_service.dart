@@ -84,6 +84,17 @@ class FirestoreService {
     return seasonsCollection.doc(seasonId).update({"events": FieldValue.arrayUnion(eventAsList)});
   }
 
+  Future<void> addUserToSeason(UserModel user, Season season) async {
+    List<String> userAsList = [user.uid];
+    await seasonsCollection
+        .doc(season.seasonId)
+        .update({"users": FieldValue.arrayUnion(userAsList), "leaderboard.${user.uid}": 0}).then((value) {
+      for (var event in season.events) {
+        eventsCollection.doc(event).update({"leaderboard.${user.uid}": 0});
+      }
+    });
+  }
+
   Future<void> updateSeasonLeaderboard(String seasonId, Map<String, int> leaderboard) {
     return seasonsCollection.doc(seasonId).update({"leaderboard": leaderboard});
   }
