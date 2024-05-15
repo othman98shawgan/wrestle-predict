@@ -98,7 +98,7 @@ class _SignInPageState extends State<SignInPage> {
               onPressed: () {
                 auth.signInWithEmailAndPassword(emailController.text, passwordController.text).then((value) {
                   if (value) {
-                    Navigator.pushReplacementNamed(context, '/home');
+                    Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
                   }
                 }).onError((error, stackTrace) {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.toString())));
