@@ -42,8 +42,14 @@ class _EventPageState extends State<EventPage> {
   }
 
   void fillPickedWinnerMap() {
-    for (var match in widget.event.matches) {
-      pickedWinnerMap[match] = widget.event.userPicks[authRepository.user!.uid]![match];
+    if (widget.event.userPicks[authRepository.user!.uid] == null) {
+      for (var match in widget.event.matches) {
+        pickedWinnerMap[match] = '-';
+      }
+    } else {
+      for (var match in widget.event.matches) {
+        pickedWinnerMap[match] = widget.event.userPicks[authRepository.user!.uid]![match] ?? '-';
+      }
     }
   }
 
