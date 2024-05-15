@@ -42,13 +42,17 @@ class _MyHomePageState extends State<MyHomePage> {
         setState(() {
           currentEvent = value;
         });
-        fs.getSeason(currentEvent.seasonId).then((value) {
-          if (value.users.contains(currentUser.uid)) {
-            setState(() {
-              isUserConnectedToCurrentEvent = true;
-            });
-          }
-        });
+        if (currentUser.isAdmin) {
+          isUserConnectedToCurrentEvent = true;
+        } else {
+          fs.getSeason(currentEvent.seasonId).then((value) {
+            if (value.users.contains(currentUser.uid)) {
+              setState(() {
+                isUserConnectedToCurrentEvent = true;
+              });
+            }
+          });
+        }
       });
     });
   }

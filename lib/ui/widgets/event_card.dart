@@ -27,13 +27,19 @@ class _EventCardState extends State<EventCard> {
     event = widget.event;
     currentUser = widget.user;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      fs.getSeason(event.seasonId).then((value) {
-        if (value.users.contains(currentUser.uid)) {
-          setState(() {
-            isUserConnectedToEvent = true;
-          });
-        }
-      });
+      if (currentUser.isAdmin) {
+        setState(() {
+          isUserConnectedToEvent = true;
+        });
+      } else {
+        fs.getSeason(event.seasonId).then((value) {
+          if (value.users.contains(currentUser.uid)) {
+            setState(() {
+              isUserConnectedToEvent = true;
+            });
+          }
+        });
+      }
     });
 
     super.initState();
