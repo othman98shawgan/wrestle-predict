@@ -142,7 +142,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         lastNameController.text)
                     .then((value) {
                   if (value) {
-                    Navigator.pushReplacementNamed(context, '/home');
+                    Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sign in failed')));
                   }

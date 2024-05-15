@@ -92,7 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
             onSelected: (value) {
               if (value == 'signOut') {
                 authRepository.signOut();
-                Navigator.pushNamed(context, "/signIn");
+                Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
               }
             },
             child: IconButton(
