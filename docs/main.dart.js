@@ -93543,7 +93543,7 @@ $1(a){return A.JL()},
 $S:576}
 A.Ny.prototype={
 I(a){var s=A.vT(B.as,null,!0),r=A.JL().a.ge5()!=null?"/home":"/signIn"
-return new A.AM(A.av(["/home",new A.acF(),"/signIn",new A.acG(),"/signUp",new A.acH(),"/seasonLeaderboard",new A.acI(),"/eventLeaderboard",new A.acJ()],t.N,t.Ab),r,"Flutter Demo",s,!1,null)}}
+return new A.AM(A.av(["/home",new A.acF(),"/signIn",new A.acG(),"/signUp",new A.acH(),"/seasonLeaderboard",new A.acI(),"/eventLeaderboard",new A.acJ()],t.N,t.Ab),r,"Wrestle Predict",s,!1,null)}}
 A.acF.prototype={
 $1(a){return B.Kt},
 $S:577}
