@@ -117,7 +117,6 @@ class _MyHomePageState extends State<MyHomePage> {
           return SingleChildScrollView(
             child: Column(
               children: <Widget>[
-                const Text('Welcome to Wrestle Predict!'),
                 const SizedBox(height: 30),
                 _buildLeaderboardButtons(context, buttonStyle),
                 const SizedBox(height: 10),
