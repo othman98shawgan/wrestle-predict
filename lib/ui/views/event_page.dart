@@ -121,7 +121,9 @@ class _EventPageState extends State<EventPage> {
                             ),
                             onPressed: () {
                               for (var i = 0; i < documents.length; i++) {
-                                pickedWinnerMap[documents[i].id] = pickedWinner[i];
+                                if (pickedWinner[i] != '-') {
+                                  pickedWinnerMap[documents[i].id] = pickedWinner[i];
+                                }
                               }
                               var event = widget.event;
                               if (currentUser.isAdmin) {
