@@ -69,10 +69,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                   Center(
                     child: Text(
                       '${getTitle(data)} Leaderboard',
-                      style: const TextStyle(
-                        fontSize: 40,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(fontSize: isMobile ? 24 : 40, fontWeight: FontWeight.bold),
                     ),
                   ),
                   const SizedBox(height: 40),
@@ -98,18 +95,12 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                           ),
                         ),
                       ],
-                      columnSpacing: 100,
-                      headingRowHeight: 80,
+                      columnSpacing: isMobile ? 80 : 200,
+                      headingRowHeight: isMobile ? 60 : 80,
                       dataRowMinHeight: 40,
                       dataRowMaxHeight: 55,
-                      headingTextStyle: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 34,
-                      ),
-                      dataTextStyle: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 26,
-                      ),
+                      headingTextStyle: TextStyle(color: Colors.white, fontSize: isMobile ? 22 : 34),
+                      dataTextStyle: TextStyle(color: Colors.white, fontSize: isMobile ? 20 : 26),
                       rows: leaderboard.entries.sorted((a, b) => b.value.compareTo(a.value)).map((entry) {
                         return DataRow(
                           cells: <DataCell>[
