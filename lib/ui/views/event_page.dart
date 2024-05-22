@@ -81,7 +81,8 @@ class _EventPageState extends State<EventPage> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: kToolbarHeight + 20,
-        title: Text(widget.event.eventName, style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+        title:
+            Text(widget.event.eventName, style: TextStyle(fontSize: isMobile ? 18 : 32, fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: FutureBuilder(
