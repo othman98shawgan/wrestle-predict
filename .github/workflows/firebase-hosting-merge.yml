@@ -19,6 +19,12 @@ jobs:
         with:
           flutter-version: '3.19.6'
 
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Flutter web
+        run: flutter build web --release --web-renderer html --base-href /wrestle-predict/
+
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
